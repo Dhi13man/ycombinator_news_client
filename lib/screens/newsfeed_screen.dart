@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_bloc.dart';
@@ -30,14 +30,10 @@ class NewsFeedListItem extends StatelessWidget {
     }
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    String out = dateTime.toIso8601String().replaceAll('T', ' Time: ');
-    return out.substring(0, out.length - 4);
-  }
-
   @override
   Widget build(BuildContext context) {
     AppConstants appConstants = context.watch<AppConstants>();
+    DataBloc dataBloc = BlocProvider.of<DataBloc>(context);
 
     // Final check if associated post has no data
     if (post == null) return Container();
@@ -45,42 +41,34 @@ class NewsFeedListItem extends StatelessWidget {
     return Card(
       elevation: 10,
       shadowColor: appConstants.getLighterForeGroundColor,
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(color: appConstants.getForeGroundColor),
         ),
         child: ListTile(
-          onTap: (_isValidUrl(post.url)) ? () => launch(post.url) : null,
+          onTap:
+              (_isValidUrl(post.url)) ? () => dataBloc.clickPost(post) : null,
           tileColor: appConstants.getBackGroundColor,
           isThreeLine: true,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           title: Text(
             post.title ?? 'error',
-            style: TextStyle(
-              color: appConstants.getForeGroundColor,
-              fontWeight: FontWeight.w500,
-            ),
+            style: appConstants.listItemTextStyle,
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'By: ${post.postedBy}' ?? '',
-                style: TextStyle(
-                  color: appConstants.getForeGroundColor,
-                  fontSize: 10,
-                ),
+                style: appConstants.listItemSubTextStyle,
               ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Text(
-                  'Posted: ${_formatDateTime(post.postedTime)}' ?? '',
-                  style: TextStyle(
-                    color: appConstants.getForeGroundColor,
-                    fontSize: 10,
-                  ),
+                  'Posted: ${dataBloc.formatDateTime(post.postedTime)}' ?? '',
+                  style: appConstants.listItemSubTextStyle,
                 ),
               ),
             ],
@@ -98,18 +86,6 @@ class NewsFeedList extends StatelessWidget {
   Widget build(BuildContext context) {
     NewsAPIBloc _newsBloc = context.watch<NewsAPIBloc>();
     AppConstants _appConstants = context.watch<AppConstants>();
-
-    // When News API Business Logic Not Ready
-    if (!(_newsBloc.state is InNewsAPIState))
-      return Center(
-        child: Text(
-          'Preparing Feed!',
-          style: TextStyle(
-            fontSize: 18,
-            color: _appConstants.getForeGroundColor,
-          ),
-        ),
-      );
 
     // News API Business Logic Ready
     return Container(
@@ -145,6 +121,10 @@ class NewsFeedList extends StatelessWidget {
                     return Center(child: CircularProgressIndicator());
 
                   Post thisPost = snapshot.data;
+
+                  // Check if post not loaded correctly
+                  if (thisPost == null || thisPost.id == -9999999)
+                    return Container();
                   return NewsFeedListItem(post: thisPost);
                 },
               );
@@ -180,7 +160,24 @@ class NewsFeedBody extends StatelessWidget {
       child: Column(
         children: [
           NewsAPICriteriaSelectBar(),
-          Expanded(child: NewsFeedList()),
+          Expanded(
+            child: BlocBuilder<NewsAPIBloc, NewsAPIState>(
+              builder: (context, state) {
+                // When News API Business Logic Not Ready
+                if (!(state is InNewsAPIState))
+                  return Center(
+                    child: Text(
+                      'Preparing Feed!',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: _appConstants.getForeGroundColor,
+                      ),
+                    ),
+                  );
+                return NewsFeedList();
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -193,11 +190,12 @@ class NewsFeedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppConstants _appConstants = context.watch<AppConstants>();
-    LoginBloc _loginBloc = context.watch<LoginBloc>();
+    AppConstants appConstants = context.watch<AppConstants>();
+    LoginBloc loginBloc = context.watch<LoginBloc>();
+    DataBloc dataBloc = context.watch<DataBloc>();
 
     return Scaffold(
-      backgroundColor: _appConstants.getForeGroundColor,
+      backgroundColor: appConstants.getForeGroundColor,
       appBar: AppBar(
         title: GestureDetector(
           onTap: () => Navigator.pushNamed(
@@ -210,51 +208,67 @@ class NewsFeedScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 10),
                 child: Text(
                   'News Feed',
-                  style: TextStyle(color: _appConstants.getBackGroundColor),
+                  style: TextStyle(color: appConstants.getBackGroundColor),
                 ),
               ),
-              Text(
-                '0 Links Opened',
-                style: TextStyle(
-                  color: _appConstants.getBackGroundColor,
-                  fontSize: 9,
-                ),
+              StreamBuilder(
+                stream: dataBloc.documentStream(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Text(
+                      '...checking Links Opened',
+                      style: TextStyle(
+                        color: appConstants.getBackGroundColor,
+                        fontSize: 9,
+                      ),
+                    );
+                  DocumentSnapshot docSnap = snapshot.data;
+                  List<PostData> postDataList =
+                      dataBloc.extractDataFromFirebase(docSnap.data());
+                  return Text(
+                    '${postDataList.length} Links Opened',
+                    style: TextStyle(
+                      color: appConstants.getBackGroundColor,
+                      fontSize: 9,
+                    ),
+                  );
+                },
               ),
             ],
           ),
         ),
-        backgroundColor: _appConstants.getForeGroundColor,
+        backgroundColor: appConstants.getForeGroundColor,
         centerTitle: true,
         toolbarHeight: kToolbarHeight,
         leading: AppHeroIcon(
-          appConstants: _appConstants,
+          appConstants: appConstants,
           iconSize: 20.0,
           margin: EdgeInsets.symmetric(horizontal: 5),
           padding: EdgeInsets.all(8),
-          backgroundColor: _appConstants.getBackGroundColor.withOpacity(0.7),
-          foregroundColor: _appConstants.getForeGroundColor,
+          backgroundColor: appConstants.getBackGroundColor.withOpacity(0.7),
+          foregroundColor: appConstants.getForeGroundColor,
         ),
         actions: [
           TextButton(
-            onPressed: () => _loginBloc.signOut(),
+            onPressed: () => loginBloc.signOut(),
             child: Text(
               'Log out',
-              style: TextStyle(color: _appConstants.getBackGroundColor),
+              style: TextStyle(color: appConstants.getBackGroundColor),
             ),
           )
         ],
         elevation: 1,
-        shadowColor: _appConstants.getLighterForeGroundColor,
+        shadowColor: appConstants.getLighterForeGroundColor,
       ),
       body: BlocListener<LoginBloc, LoginState>(
-        cubit: _loginBloc,
+        cubit: loginBloc,
         listener: (context, state) {
           if (state is SignedOutLoginState)
             Navigator.of(context).pushReplacementNamed(
               LoginScreen.routeName,
             );
         },
-        child: NewsFeedBody(appConstants: _appConstants),
+        child: NewsFeedBody(appConstants: appConstants),
       ),
     );
   }

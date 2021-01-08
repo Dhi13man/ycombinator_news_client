@@ -9,126 +9,79 @@ import 'package:ycombinator_hacker_news/backend/constants.dart';
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
 import 'package:ycombinator_hacker_news/screens/login_screen.dart';
+import 'package:ycombinator_hacker_news/screens/newsfeed_screen.dart';
 import 'package:ycombinator_hacker_news/screens/splash_screen.dart';
 import 'package:ycombinator_hacker_news/screens/sort_bars.dart';
-
-class ClickedNewsFeedListItem extends StatelessWidget {
-  const ClickedNewsFeedListItem({
-    Key key,
-    @required this.post,
-  }) : super(key: key);
-
-  final Post post;
-
-  @override
-  Widget build(BuildContext context) {
-    AppConstants appConstants = context.watch<AppConstants>();
-    DataBloc dataBloc = context.watch<DataBloc>();
-    return Card(
-      elevation: 10,
-      shadowColor: appConstants.getLighterForeGroundColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: appConstants.getForeGroundColor),
-        ),
-        child: ListTile(
-          onTap: () => Navigator.of(context).pushNamed(
-            ClickedNewsFeedScreen.routeName,
-            arguments: post,
-          ),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          title: Text(
-            post?.postedBy ?? 'error',
-            style: TextStyle(
-              color: appConstants.getForeGroundColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '',
-                style: TextStyle(
-                  color: appConstants.getForeGroundColor,
-                  fontSize: 10,
-                ),
-              ),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Text(
-                  '',
-                  style: TextStyle(
-                    color: appConstants.getForeGroundColor,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          isThreeLine: true,
-          trailing: IconButton(
-            icon: Icon(
-              Icons.delete,
-              color: appConstants.getForeGroundColor.shade800,
-            ),
-            onPressed: () => dataBloc.deletePostFromHistory(post),
-          ),
-          tileColor: appConstants.getBackGroundColor,
-        ),
-      ),
-    );
-  }
-}
 
 class ClickedNewsFeedList extends StatelessWidget {
   const ClickedNewsFeedList({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    DataBloc _dataBloc = context.watch<DataBloc>();
-    AppConstants _appConstants = context.watch<AppConstants>();
+    DataBloc dataBloc = context.watch<DataBloc>();
+    AppConstants appConstants = context.watch<AppConstants>();
 
     return Container(
       // For Streaming favorite posts from Firebase or Local storage.
       child: StreamBuilder(
-        stream: _dataBloc.documentStream(),
+        stream: dataBloc.documentStream(),
         builder: (context, snapshot) {
           if (!snapshot.hasData)
             return Center(child: CircularProgressIndicator());
 
           DocumentSnapshot docSnap = snapshot.data;
-          Future<List<PostData>> clickedPostsFuture =
-              _dataBloc.extractDataFromFirebase(docSnap.data());
+          List<PostData> postDataList =
+              dataBloc.extractDataFromFirebase(docSnap.data());
 
-          // To wait for current list of Favorite posts.
-          return FutureBuilder(
-            future: clickedPostsFuture,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData)
-                return Center(child: CircularProgressIndicator());
+          return ListView.builder(
+            itemCount: postDataList.length,
+            itemBuilder: (context, index) {
+              PostData postData = postDataList[index];
+              // To get associated Post from PostData.
+              return FutureBuilder(
+                future: postData.futurePost,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Center(child: CircularProgressIndicator());
 
-              List<PostData> clickedPosts = snapshot.data;
-
-              if (clickedPosts.isEmpty)
-                return Center(
-                  child: Text(
-                    'No Posts Clicked yet!',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: _appConstants.getForeGroundColor,
-                    ),
-                  ),
-                );
-
-              return ListView.builder(
-                itemCount: clickedPosts.length,
-                itemBuilder: (context, index) {
-                  return ClickedNewsFeedListItem(
-                    post: clickedPosts[index] ?? Post.empty,
+                  Post post = snapshot.data;
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            NewsFeedListItem(
+                              post: post ?? Post.empty,
+                            ),
+                            Text(
+                              'Last Clicked: ${dataBloc.formatDateTime(postData.lastClickTime)}',
+                              style: appConstants.listItemSubTextStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Column(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                color: appConstants.getForeGroundColor.shade800,
+                              ),
+                              tooltip: 'Delete Post from Clicked History!',
+                              onPressed: () =>
+                                  dataBloc.deletePostFromHistory(post),
+                            ),
+                            Text(
+                              '${postData.clicks} Clicks',
+                              style: appConstants.listItemTextStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   );
                 },
               );

@@ -24,6 +24,17 @@ class AppConstants extends ChangeNotifier {
 
   Color get getBackGroundColor => (_isThemeLight) ? Colors.white : Colors.black;
 
+  /// Styles
+  TextStyle get listItemSubTextStyle => TextStyle(
+        color: getForeGroundColor,
+        fontSize: 10,
+      );
+
+  TextStyle get listItemTextStyle => TextStyle(
+        color: getForeGroundColor,
+        fontWeight: FontWeight.w500,
+      );
+
   /// Other Functions
   void findTheme() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

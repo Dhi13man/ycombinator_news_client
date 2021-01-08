@@ -42,14 +42,12 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
     }
   }
 
-  Future<Post> getPostFromID(int id) async {
+  Future<Post> getPostFromID(int id, {int repeat = 1}) async {
     try {
       if (state is ErrorNewsAPIState) await _initialize();
-
       http.Response response = await http.get(
         'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty',
       );
-
       if (response.statusCode != 200)
         throw (HttpException('Response Code ${response.statusCode}'));
       else {
@@ -66,11 +64,12 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
         );
       }
     } catch (_) {
-      return Post.empty;
+      if (repeat <= 1) return Future.value(Post.empty);
+      return await getPostFromID(id, repeat: repeat - 1);
     }
   }
 
-  Future<Comment> getCommentFromID(int id) async {
+  Future<Comment> getCommentFromID(int id, {int repeat = 1}) async {
     try {
       if (state is ErrorNewsAPIState) await _initialize();
 
@@ -93,7 +92,8 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
         );
       }
     } catch (_) {
-      return Comment.empty;
+      if (repeat <= 1) return Future.value(Comment.empty);
+      return await getCommentFromID(id, repeat: repeat - 1);
     }
   }
 

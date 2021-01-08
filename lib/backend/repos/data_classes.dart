@@ -77,7 +77,7 @@ class Post extends Equatable {
 
   /// Empty post.
   static final Post empty = Post(
-    id: -73822834, // Corrupted/Empty post identifier
+    id: -9999999, // Corrupted/Empty post identifier
     postedTime: DateTime.now(),
     postedBy: '',
     url: '',
@@ -91,15 +91,15 @@ class Post extends Equatable {
 
 /// Contains a [post], the number of times it was clicked [clicks], and when it was last clicked [lastClickTime]
 class PostData {
-  PostData({this.post, this.clicks, this.lastClickTime});
+  PostData({this.futurePost, this.clicks, this.lastClickTime});
 
   static PostData empty = PostData(
-    post: Post.empty,
+    futurePost: Future.value(Post.empty),
     clicks: 1,
     lastClickTime: DateTime.now(),
   );
 
-  Post post;
+  Future<Post> futurePost;
   int clicks;
   DateTime lastClickTime;
 }
@@ -131,7 +131,7 @@ class User extends Equatable {
   final String password;
 
   /// Empty user which represents an unauthenticated user.
-  static const empty = User(email: '', id: '', password: '', name: null);
+  static const User empty = User(email: '', id: '', password: '', name: null);
 
   @override
   List<Object> get props => [email, id, name];

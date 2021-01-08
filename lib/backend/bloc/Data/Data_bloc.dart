@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_state.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_bloc.dart';
@@ -83,6 +84,17 @@ class DataBloc extends Cubit<DataState> {
     }
   }
 
+  /// When User wants to Open URL, Save to databases and Open
+  void clickPost(Post post) async {
+    bool didOpen;
+    try {
+      didOpen = await launch(post.url);
+    } catch (_) {
+      didOpen = false;
+    }
+    if (didOpen) addPost(post);
+  }
+
   /// To implement sorted Post List Building.
   ///  [filter] specifies what property to sort with from ['Time', 'Number of Clicks']
   /// List wil be in ascending order if [isAscending] is true
@@ -105,6 +117,7 @@ class DataBloc extends Cubit<DataState> {
     String postKey = postID.toString();
     DocumentSnapshot snap = await documentCheck();
     Map<String, dynamic> currentData = snap.data();
+
     if (currentData == null || !currentData.containsKey(postKey)) return 0;
     return currentData[postKey]['clicks'];
   }
@@ -118,7 +131,7 @@ class DataBloc extends Cubit<DataState> {
 
       if (clickedTimes > 0) {
         Map<String, dynamic> _editedMappedPost = clickedPostToMap(post);
-        _editedMappedPost['clicks'] = clickedTimes + 1;
+        _editedMappedPost[post.id.toString()]['clicks'] = clickedTimes + 1;
 
         await reference.update(_editedMappedPost);
         return true;
@@ -128,6 +141,7 @@ class DataBloc extends Cubit<DataState> {
         clickedPostToMap(post),
         SetOptions(merge: true),
       );
+
       return true;
     } else {
       _loginBloc.emit(SignedOutLoginState());
@@ -150,21 +164,17 @@ class DataBloc extends Cubit<DataState> {
   /// Utilities
 
   /// Extracts Database from Firestore and converts it to a list of [PostData]
-  Future<List<PostData>> extractDataFromFirebase(
-    Map<dynamic, dynamic> firebaseData,
-  ) async {
-    List<Future<PostData>> futurePostsList = [];
+  List<PostData> extractDataFromFirebase(
+    Map<String, dynamic> firebaseData,
+  ) {
+    List<PostData> postDataList = [];
     firebaseData?.forEach(
-      (key, value) => futurePostsList.add(
+      (key, value) => postDataList.add(
         _mapToClickedPost(postID: key, postData: value),
       ),
     );
 
-    List<PostData> outputPostsList = [];
-    for (int i = 0; i < futurePostsList.length; ++i)
-      outputPostsList.add(await futurePostsList[i]);
-
-    outputPostsList.sort(
+    postDataList.sort(
       (PostData a, PostData b) {
         if (state is InDataState) {
           InDataState _state = state;
@@ -178,7 +188,7 @@ class DataBloc extends Cubit<DataState> {
         return 0;
       },
     );
-    return outputPostsList;
+    return postDataList;
   }
 
   /// Extracts a Map of values from a Reservation Class
@@ -187,10 +197,10 @@ class DataBloc extends Cubit<DataState> {
       };
 
   /// Extracts a Reservation Class from a Firebase Map of values
-  Future<PostData> _mapToClickedPost({
+  PostData _mapToClickedPost({
     dynamic postID,
     Map<String, dynamic> postData,
-  }) async {
+  }) {
     try {
       int id;
       if (postID is String)
@@ -200,43 +210,24 @@ class DataBloc extends Cubit<DataState> {
       else
         throw ('Invalid Data Type');
 
-      Post _post = await _newsAPIBloc.getPostFromID(id);
       return PostData(
         clicks: postData['clicks'],
-        lastClickTime: postData['time'],
-        post: _post,
+        lastClickTime: timestampToDatetime(postData['time']),
+        futurePost: _newsAPIBloc.getPostFromID(id, repeat: 10),
       );
     } catch (e) {
+      print(e);
       return PostData.empty;
     }
   }
 
-  /// Reformat Date String to enable parsing
-  /// from mm/dd/yyyy HH:MM:SS to yyyy-dd-mmmm HH:MM:SS
-  String reformatDate(String inDateString) {
-    String _dateString = inDateString.replaceAll('/', '-');
-    List<String> dateTimeTemp = _dateString.split(' ');
-    List<String> dateTemp = dateTimeTemp[0].split('-');
-
-    // 0 padding if needed
-    for (int i = 0; i < dateTemp.length; i++) {
-      String element = dateTemp[i];
-      if (element.length == 1) dateTemp[i] = '0$element';
-    }
-
-    // Swap Month and day
-    String temp = dateTemp[0];
-    dateTemp[0] = dateTemp[1];
-    dateTemp[1] = temp;
-
-    dateTimeTemp[0] = dateTemp.reversed.join('-');
-    _dateString = dateTimeTemp.join(' ');
-    return _dateString;
+  /// Reformat Date String to look Readable
+  String formatDateTime(DateTime dateTime) {
+    String out = dateTime.toIso8601String().replaceAll('T', ' Time: ');
+    return out.substring(0, out.length - 4);
   }
 
-  String dateTimeToString(DateTime dateTime) =>
-      dateTime.toIso8601String().replaceAll('T', ' Time: ');
-
+  /// Converts [Timestamp] input [inputTimestamp] to [DateTime].
   DateTime timestampToDatetime(Timestamp inputTimestamp) =>
       inputTimestamp.toDate();
 }
