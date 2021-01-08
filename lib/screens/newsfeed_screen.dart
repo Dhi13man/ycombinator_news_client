@@ -30,12 +30,17 @@ class NewsFeedListItem extends StatelessWidget {
     }
   }
 
+  String _formatDateTime(DateTime dateTime) {
+    String out = dateTime.toIso8601String().replaceAll('T', ' Time: ');
+    return out.substring(0, out.length - 4);
+  }
+
   @override
   Widget build(BuildContext context) {
     AppConstants appConstants = context.watch<AppConstants>();
 
     // Final check if associated post has no data
-    if (post == null || post == Post.empty) return Container();
+    if (post == null) return Container();
 
     return Card(
       elevation: 10,
@@ -46,15 +51,13 @@ class NewsFeedListItem extends StatelessWidget {
           border: Border.all(color: appConstants.getForeGroundColor),
         ),
         child: ListTile(
-          onTap: (post.url != null && _isValidUrl(post.url))
-              ? () => launch(post.url)
-              : null,
+          onTap: (_isValidUrl(post.url)) ? () => launch(post.url) : null,
           tileColor: appConstants.getBackGroundColor,
           isThreeLine: true,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           title: Text(
-            post?.title ?? 'error',
+            post.title ?? 'error',
             style: TextStyle(
               color: appConstants.getForeGroundColor,
               fontWeight: FontWeight.w500,
@@ -64,7 +67,7 @@ class NewsFeedListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'by: ${post?.postedBy}' ?? '',
+                'By: ${post.postedBy}' ?? '',
                 style: TextStyle(
                   color: appConstants.getForeGroundColor,
                   fontSize: 10,
@@ -73,7 +76,7 @@ class NewsFeedListItem extends StatelessWidget {
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Text(
-                  '',
+                  'Posted: ${_formatDateTime(post.postedTime)}' ?? '',
                   style: TextStyle(
                     color: appConstants.getForeGroundColor,
                     fontSize: 10,
@@ -140,13 +143,9 @@ class NewsFeedList extends StatelessWidget {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
                     return Center(child: CircularProgressIndicator());
-                  Post thisPost = snapshot.data;
 
-                  if (thisPost == null) // Corrupted post recieved
-                    return Container();
-                  return NewsFeedListItem(
-                    post: thisPost ?? Post.empty,
-                  );
+                  Post thisPost = snapshot.data;
+                  return NewsFeedListItem(post: thisPost);
                 },
               );
             },
@@ -250,11 +249,10 @@ class NewsFeedScreen extends StatelessWidget {
       body: BlocListener<LoginBloc, LoginState>(
         cubit: _loginBloc,
         listener: (context, state) {
-          if (state is SignedOutLoginState) {
+          if (state is SignedOutLoginState)
             Navigator.of(context).pushReplacementNamed(
               LoginScreen.routeName,
             );
-          }
         },
         child: NewsFeedBody(appConstants: _appConstants),
       ),

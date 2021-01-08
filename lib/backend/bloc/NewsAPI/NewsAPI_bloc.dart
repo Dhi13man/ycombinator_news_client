@@ -57,7 +57,8 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
         Map<String, dynamic> outputMap = json.decode(responseOutput);
         return Post(
           id: outputMap['id'],
-          postedTime: DateTime.fromMillisecondsSinceEpoch(outputMap['time']),
+          postedTime:
+              DateTime.fromMillisecondsSinceEpoch(outputMap['time'] * 1000),
           url: outputMap['url'],
           comments: outputMap['kids'],
           postedBy: outputMap['by'],
@@ -83,7 +84,8 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
         Map<String, dynamic> outputMap = json.decode(responseOutput);
         return Comment(
           id: outputMap['id'],
-          postedTime: DateTime.fromMillisecondsSinceEpoch(outputMap['time']),
+          postedTime:
+              DateTime.fromMillisecondsSinceEpoch(outputMap['time'] * 1000),
           children: outputMap['kids'],
           parentID: outputMap['parent'],
           postedBy: outputMap['by'],
