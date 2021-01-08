@@ -38,10 +38,10 @@ class InNewsAPIState extends NewsAPIState {
     String criteria = 'Top',
   })  : selectedCriteriaButtonText = criteria,
         super([criteria]) {
-    saveSortingPreferences();
+    _saveSortingPreferences();
   }
 
-  void saveSortingPreferences() async {
+  void _saveSortingPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('newsType', selectedCriteriaButtonText);
   }

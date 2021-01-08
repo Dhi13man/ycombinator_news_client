@@ -30,7 +30,7 @@ class DataBloc extends Cubit<DataState> {
         _newsAPIBloc = newsAPIBloc,
         super(initialState ?? UnDataState()) {
     _firestore.settings = Settings(persistenceEnabled: false);
-    _initialise();
+    _initialize();
   }
 
   /// Token to give each user different session
@@ -43,7 +43,7 @@ class DataBloc extends Cubit<DataState> {
       return 'default_doc';
   }
 
-  void _initialise() async {
+  void _initialize() async {
     await _firestore.enableNetwork();
     CollectionReference reservations = FirebaseFirestore.instance.collection(
       _collectionName,
@@ -67,7 +67,7 @@ class DataBloc extends Cubit<DataState> {
       InDataState _state = state;
       return _state.collection.doc('${docToken}_doc').snapshots();
     } else {
-      _initialise();
+      _initialize();
       return Stream.empty();
     }
   }
@@ -78,12 +78,12 @@ class DataBloc extends Cubit<DataState> {
       InDataState _state = state;
       return _state.collection.doc('${docToken}_doc').get();
     } else {
-      _initialise();
+      _initialize();
       return Future.value();
     }
   }
 
-  /// To implement sorted Reservation List Building.
+  /// To implement sorted Post List Building.
   ///  [filter] specifies what property to sort with from ['Time', 'Number of Clicks']
   /// List wil be in ascending order if [isAscending] is true
   void rebuildClickedPostsStream({String filter, bool isAscending}) {
@@ -97,9 +97,10 @@ class DataBloc extends Cubit<DataState> {
         ),
       );
     } else
-      _initialise();
+      _initialize();
   }
 
+  /// Returns how many time [Post] of id [postID] has been clicked so far
   Future<int> _timesPostClickedEarlier(int postID) async {
     String postKey = postID.toString();
     DocumentSnapshot snap = await documentCheck();
@@ -108,6 +109,7 @@ class DataBloc extends Cubit<DataState> {
     return currentData[postKey]['clicks'];
   }
 
+  /// Called to save [post] when it is clicked by user.
   Future<bool> addPost(Post post) async {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
       InDataState _state = state;
@@ -133,6 +135,7 @@ class DataBloc extends Cubit<DataState> {
     }
   }
 
+  /// Deletes Given [post] from saved clicked posts.
   Future<void> deletePostFromHistory(Post post) async {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
       InDataState _state = state;
@@ -147,25 +150,34 @@ class DataBloc extends Cubit<DataState> {
   /// Utilities
 
   /// Extracts Database from Firestore and converts it to a list of [PostData]
-  List<PostData> extractDataFromFirebase(Map<dynamic, dynamic> firebaseData) {
-    List<PostData> outputPostsList = [];
+  Future<List<PostData>> extractDataFromFirebase(
+    Map<dynamic, dynamic> firebaseData,
+  ) async {
+    List<Future<PostData>> futurePostsList = [];
     firebaseData?.forEach(
-      (key, value) => outputPostsList.add(
+      (key, value) => futurePostsList.add(
         _mapToClickedPost(postID: key, postData: value),
       ),
     );
-    outputPostsList.sort((PostData a, PostData b) {
-      if (state is InDataState) {
-        InDataState _state = state;
-        String _criteria = _state.criteria;
-        int isAscending = (_state.isAscending) ? 1 : -1;
-        if (_criteria == 'time')
-          return isAscending * a.lastClickTime.compareTo(b.lastClickTime);
-        if (_criteria == 'clicks')
-          return isAscending * a.clicks.compareTo(b.clicks);
-      }
-      return 0;
-    });
+
+    List<PostData> outputPostsList = [];
+    for (int i = 0; i < futurePostsList.length; ++i)
+      outputPostsList.add(await futurePostsList[i]);
+
+    outputPostsList.sort(
+      (PostData a, PostData b) {
+        if (state is InDataState) {
+          InDataState _state = state;
+          String _criteria = _state.criteria;
+          int isAscending = (_state.isAscending) ? 1 : -1;
+          if (_criteria == 'time')
+            return isAscending * a.lastClickTime.compareTo(b.lastClickTime);
+          if (_criteria == 'clicks')
+            return isAscending * a.clicks.compareTo(b.clicks);
+        }
+        return 0;
+      },
+    );
     return outputPostsList;
   }
 
@@ -175,7 +187,10 @@ class DataBloc extends Cubit<DataState> {
       };
 
   /// Extracts a Reservation Class from a Firebase Map of values
-  PostData _mapToClickedPost({dynamic postID, Map<String, dynamic> postData}) {
+  Future<PostData> _mapToClickedPost({
+    dynamic postID,
+    Map<String, dynamic> postData,
+  }) async {
     try {
       int id;
       if (postID is String)
@@ -185,7 +200,7 @@ class DataBloc extends Cubit<DataState> {
       else
         throw ('Invalid Data Type');
 
-      Post _post = Post.empty; // TODO: Implement id to Post getter
+      Post _post = await _newsAPIBloc.getPostFromID(id);
       return PostData(
         clicks: postData['clicks'],
         lastClickTime: postData['time'],

@@ -122,7 +122,7 @@ class LoginButtons extends StatelessWidget {
             ],
           ),
           CupertinoButton(
-            onPressed: () {},
+            onPressed: () => loginBloc.signInAnonymous(),
             padding: EdgeInsets.zero,
             child: Container(
               margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),

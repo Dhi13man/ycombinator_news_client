@@ -18,6 +18,8 @@ class LoginBloc extends Cubit<LoginState> {
         _authenticationRepository = authenticationRepository,
         super(UnLoginState());
 
+  void signInAnonymous() => emit(SignedInLoginState());
+
   void signInEmail({
     @required String email,
     @required String password,

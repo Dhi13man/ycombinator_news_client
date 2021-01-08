@@ -18,30 +18,38 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
 
   Future<bool> _canConnect() async {
     try {
-      return await DataConnectionChecker().hasConnection;
+      return DataConnectionChecker().hasConnection;
     } catch (_) {
       return false;
     }
   }
 
-  void _initialize() async {
+  /// Initialize or Reinitialize API bloc after checking internet
+  Future<void> _initialize() async {
     bool hasInternet = await _canConnect();
-
-    // Check if user has preffered saved Sorting Preferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String savedCriteria = prefs.getString('newsType');
 
     if (!hasInternet)
       emit(ErrorNewsAPIState('No Internet!'));
-    else
-      emit(InNewsAPIState(criteria: savedCriteria ?? InNewsAPIState.viewByTop));
+    else {
+      /// Check if user has preferred saved News Type Preferences (Top default)
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String _getSavedCritieria = prefs.getString('newsType');
+      emit(
+        InNewsAPIState(
+          criteria: _getSavedCritieria ?? InNewsAPIState.viewByTop,
+        ),
+      );
+    }
   }
 
   Future<Post> getPostFromID(int id) async {
     try {
+      if (state is ErrorNewsAPIState) await _initialize();
+
       http.Response response = await http.get(
         'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty',
       );
+
       if (response.statusCode != 200)
         throw (HttpException('Response Code ${response.statusCode}'));
       else {
@@ -56,14 +64,15 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
           title: outputMap['title'],
         );
       }
-    } catch (e) {
-      emit(ErrorNewsAPIState(e.toString()));
+    } catch (_) {
       return Post.empty;
     }
   }
 
   Future<Comment> getCommentFromID(int id) async {
     try {
+      if (state is ErrorNewsAPIState) await _initialize();
+
       http.Response response = await http.get(
         'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty',
       );
@@ -81,9 +90,52 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
           title: outputMap['text'],
         );
       }
-    } catch (e) {
-      emit(ErrorNewsAPIState(e.toString()));
+    } catch (_) {
       return Comment.empty;
     }
+  }
+
+  Future<List<Future<Post>>> getPosts() async {
+    try {
+      if (state is ErrorNewsAPIState) await _initialize();
+
+      if (state is InNewsAPIState) {
+        InNewsAPIState _state = state;
+
+        http.Response response = await http.get(
+          'https://hacker-news.firebaseio.com/v0/${_state.criteria}stories.json?print=pretty',
+        );
+        if (response.statusCode != 200)
+          throw (HttpException('Response Code ${response.statusCode}'));
+        else {
+          String responseOutput = response.body;
+          List<dynamic> postIDList = json.decode(responseOutput);
+
+          List<Future<Post>> outPosts = [];
+
+          postIDList.forEach((postID) => outPosts.add(getPostFromID(postID)));
+          return outPosts;
+        }
+      } else
+        return Future.value([]);
+    } catch (_) {
+      return Future.value([]);
+    }
+  }
+
+  /// To implement sorted Post List Building.
+  ///  [filter] specifies what property to sort with from ['Time', 'Number of Clicks']
+  /// List wil be in ascending order if [isAscending] is true
+  void reloadPosts({String filter, bool isAscending}) {
+    if (state is InNewsAPIState) {
+      InNewsAPIState _state = state;
+      emit(UnNewsAPIState());
+      emit(
+        InNewsAPIState(
+          criteria: filter ?? _state.criteria,
+        ),
+      );
+    } else
+      _initialize();
   }
 }

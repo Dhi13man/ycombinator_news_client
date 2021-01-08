@@ -77,7 +77,7 @@ class Post extends Equatable {
 
   /// Empty post.
   static final Post empty = Post(
-    id: 0,
+    id: -73822834, // Corrupted/Empty post identifier
     postedTime: DateTime.now(),
     postedBy: '',
     url: '',

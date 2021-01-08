@@ -10,7 +10,7 @@ import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
 import 'package:ycombinator_hacker_news/screens/login_screen.dart';
 import 'package:ycombinator_hacker_news/screens/splash_screen.dart';
-import 'package:ycombinator_hacker_news/screens/sort_bar.dart';
+import 'package:ycombinator_hacker_news/screens/sort_bars.dart';
 
 class ClickedNewsFeedListItem extends StatelessWidget {
   const ClickedNewsFeedListItem({
@@ -93,6 +93,7 @@ class ClickedNewsFeedList extends StatelessWidget {
     AppConstants _appConstants = context.watch<AppConstants>();
 
     return Container(
+      // For Streaming favorite posts from Firebase or Local storage.
       child: StreamBuilder(
         stream: _dataBloc.documentStream(),
         builder: (context, snapshot) {
@@ -100,24 +101,36 @@ class ClickedNewsFeedList extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
 
           DocumentSnapshot docSnap = snapshot.data;
-          List<PostData> clickedPosts =
+          Future<List<PostData>> clickedPostsFuture =
               _dataBloc.extractDataFromFirebase(docSnap.data());
-          if (clickedPosts.isEmpty)
-            return Center(
-              child: Text(
-                'News feed not loaded yet!',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: _appConstants.getForeGroundColor,
-                ),
-              ),
-            );
 
-          return ListView.builder(
-            itemCount: clickedPosts.length,
-            itemBuilder: (context, index) {
-              return ClickedNewsFeedListItem(
-                post: clickedPosts[index] ?? Post.empty,
+          // To wait for current list of Favorite posts.
+          return FutureBuilder(
+            future: clickedPostsFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData)
+                return Center(child: CircularProgressIndicator());
+
+              List<PostData> clickedPosts = snapshot.data;
+
+              if (clickedPosts.isEmpty)
+                return Center(
+                  child: Text(
+                    'No Posts Clicked yet!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: _appConstants.getForeGroundColor,
+                    ),
+                  ),
+                );
+
+              return ListView.builder(
+                itemCount: clickedPosts.length,
+                itemBuilder: (context, index) {
+                  return ClickedNewsFeedListItem(
+                    post: clickedPosts[index] ?? Post.empty,
+                  );
+                },
               );
             },
           );
@@ -150,7 +163,7 @@ class ClickedNewsFeedBody extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       child: Column(
         children: [
-          SortBar(),
+          FirebaseDataSortBar(),
           Expanded(child: ClickedNewsFeedList()),
         ],
       ),

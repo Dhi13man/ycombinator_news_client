@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_bloc.dart';
+import 'package:ycombinator_hacker_news/backend/bloc/NewsAPI/NewsAPI_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/constants.dart';
 
 class SortButton extends StatelessWidget {
@@ -9,16 +10,17 @@ class SortButton extends StatelessWidget {
     Key key,
     @required String sortByText,
     @required String selectedCriteriaButtonText,
-    @required DataBloc dataBloc,
+    @required void Function({String filter, bool isAscending}) rebuildFunction,
   })  : _sortByText = sortByText ?? 'null',
         _selectedCriteriaButtonText = selectedCriteriaButtonText ?? sortByText,
-        assert(dataBloc != null),
-        _dataBloc = dataBloc,
+        assert(rebuildFunction != null),
+        _rebuildClickedPostsStream = rebuildFunction,
         super(key: key);
 
   final String _sortByText;
   final String _selectedCriteriaButtonText;
-  final DataBloc _dataBloc;
+  final void Function({String filter, bool isAscending})
+      _rebuildClickedPostsStream;
 
   @override
   Widget build(BuildContext context) {
@@ -36,22 +38,24 @@ class SortButton extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontSize: 10),
         ),
         onPressed: (_sortByText != _selectedCriteriaButtonText)
-            ? () => _dataBloc.rebuildClickedPostsStream(filter: _sortByText)
+            ? () => _rebuildClickedPostsStream(
+                  filter: _sortByText,
+                )
             : null,
       ),
     );
   }
 }
 
-class SortBar extends StatelessWidget {
-  const SortBar({Key key}) : super(key: key);
+class FirebaseDataSortBar extends StatelessWidget {
+  const FirebaseDataSortBar({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     AppConstants _appConstants = context.watch<AppConstants>();
     DataBloc dataBloc = context.watch<DataBloc>();
     bool isAscendingSort = true;
-    String selectedCriteriaButtonText = 'Name';
+    String selectedCriteriaButtonText = InDataState.sortedByClickTime;
 
     if (dataBloc.state is InDataState) {
       InDataState state = dataBloc.state;
@@ -75,12 +79,12 @@ class SortBar extends StatelessWidget {
           ),
           SortButton(
             sortByText: InDataState.sortedByClickTime,
-            dataBloc: dataBloc,
+            rebuildFunction: dataBloc.rebuildClickedPostsStream,
             selectedCriteriaButtonText: selectedCriteriaButtonText,
           ),
           SortButton(
             sortByText: InDataState.sortedByClicksNumber,
-            dataBloc: dataBloc,
+            rebuildFunction: dataBloc.rebuildClickedPostsStream,
             selectedCriteriaButtonText: selectedCriteriaButtonText,
           ),
           Expanded(
@@ -99,6 +103,55 @@ class SortBar extends StatelessWidget {
               ),
             ),
           )
+        ],
+      ),
+    );
+  }
+}
+
+class NewsAPICriteriaSelectBar extends StatelessWidget {
+  const NewsAPICriteriaSelectBar({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    AppConstants _appConstants = context.watch<AppConstants>();
+    NewsAPIBloc newsAPIBloc = context.watch<NewsAPIBloc>();
+    String selectedCriteriaButtonText = InNewsAPIState.viewByTop;
+
+    if (newsAPIBloc.state is InNewsAPIState) {
+      InNewsAPIState state = newsAPIBloc.state;
+      selectedCriteriaButtonText = state.selectedCriteriaButtonText;
+    }
+
+    return Container(
+      height: 30,
+      margin: EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Container(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'View Posts: ',
+              style: TextStyle(
+                color: _appConstants.getForeGroundColor,
+              ),
+            ),
+          ),
+          SortButton(
+            sortByText: InNewsAPIState.viewByTop,
+            rebuildFunction: newsAPIBloc.reloadPosts,
+            selectedCriteriaButtonText: selectedCriteriaButtonText,
+          ),
+          SortButton(
+            sortByText: InNewsAPIState.viewByBest,
+            rebuildFunction: newsAPIBloc.reloadPosts,
+            selectedCriteriaButtonText: selectedCriteriaButtonText,
+          ),
+          SortButton(
+            sortByText: InNewsAPIState.viewByNew,
+            rebuildFunction: newsAPIBloc.reloadPosts,
+            selectedCriteriaButtonText: selectedCriteriaButtonText,
+          ),
         ],
       ),
     );

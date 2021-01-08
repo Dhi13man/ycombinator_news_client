@@ -31,10 +31,10 @@ class InDataState extends DataState {
     this.isAscending = true,
   })  : selectedCriteriaButtonText = criteria,
         super([collection, criteria, isAscending]) {
-    saveSortingPreferences();
+    _saveSortingPreferences();
   }
 
-  void saveSortingPreferences() async {
+  void _saveSortingPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('criteria', selectedCriteriaButtonText);
     await prefs.setBool('isAscending', isAscending);
