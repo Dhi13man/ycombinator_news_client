@@ -190,7 +190,7 @@ class _LoginFormState extends State<LoginForm> {
       margin: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 15),
       shadowColor: widget._appConstants.getLighterForeGroundColor,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+        padding: EdgeInsets.symmetric(vertical: 3, horizontal: 30),
         child: Form(
           key: widget._formKey,
           autovalidateMode: AutovalidateMode.always,

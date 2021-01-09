@@ -60,6 +60,7 @@ class AppHeroIcon extends StatelessWidget {
         message: 'Toggle Theme',
         child: Hero(
           tag: 'icon',
+          transitionOnUserGestures: true,
           child: Container(
             margin: _margin,
             padding: _padding,

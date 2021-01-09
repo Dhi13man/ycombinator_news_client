@@ -1,6 +1,6 @@
 # ycombinator_hacker_news
 
-A Flutter based client application for YCombinator's hacker news API, using GetX for State Management.
+A Flutter based client application for YCombinator's hacker news API, using Bloc pattern and ChangeNotifier for State Management, and both Local and Cloud Firebase Authenticated Database, as per need.
 
 ## Getting Started
 

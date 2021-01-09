@@ -299,8 +299,8 @@ class NewsFeedScreen extends StatelessWidget {
           iconSize: 20.0,
           margin: EdgeInsets.symmetric(horizontal: 5),
           padding: EdgeInsets.all(8),
-          backgroundColor: appConstants.getBackGroundColor.withOpacity(0.7),
-          foregroundColor: appConstants.getForeGroundColor,
+          backgroundColor: Colors.transparent,
+          foregroundColor: appConstants.getBackGroundColor,
         ),
         actions: [
           TextButton(
@@ -322,7 +322,13 @@ class NewsFeedScreen extends StatelessWidget {
               LoginScreen.routeName,
             );
         },
-        child: NewsFeedBody(appConstants: appConstants),
+        child: GestureDetector(
+          onHorizontalDragEnd: (details) {
+            if (details.primaryVelocity < 0)
+              Navigator.of(context).pushNamed(ClickedNewsFeedScreen.routeName);
+          },
+          child: NewsFeedBody(appConstants: appConstants),
+        ),
       ),
     );
   }

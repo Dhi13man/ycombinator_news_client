@@ -189,8 +189,8 @@ class ClickedNewsFeedScreen extends StatelessWidget {
             iconSize: 20.0,
             margin: EdgeInsets.symmetric(horizontal: 0),
             padding: EdgeInsets.all(8),
-            backgroundColor: appConstants.getBackGroundColor.withOpacity(0.7),
-            foregroundColor: appConstants.getForeGroundColor,
+            backgroundColor: Colors.transparent,
+            foregroundColor: appConstants.getBackGroundColor,
           ),
           IconButton(
             onPressed: () async =>
@@ -213,7 +213,12 @@ class ClickedNewsFeedScreen extends StatelessWidget {
             );
           }
         },
-        child: ClickedNewsFeedBody(appConstants: appConstants),
+        child: GestureDetector(
+          onHorizontalDragEnd: (details) {
+            if (details.primaryVelocity > 0) Navigator.of(context).pop();
+          },
+          child: ClickedNewsFeedBody(appConstants: appConstants),
+        ),
       ),
     );
   }

@@ -84,7 +84,7 @@ class ReservationApp extends StatelessWidget {
                   ),
                 ),
                 type: PageTransitionType.fade,
-                duration: Duration(seconds: 1),
+                duration: Duration(milliseconds: 500),
                 settings: settings,
               );
               break;
@@ -106,7 +106,8 @@ class ReservationApp extends StatelessWidget {
                     );
                   },
                 ),
-                type: PageTransitionType.bottomToTop,
+                type: PageTransitionType.rightToLeftWithFade,
+                reverseDuration: Duration(milliseconds: 500),
                 duration: Duration(milliseconds: 500),
                 settings: settings,
               );
@@ -133,6 +134,9 @@ class ReservationApp extends StatelessWidget {
                   },
                 ),
                 type: PageTransitionType.rightToLeftWithFade,
+                childCurrent: ClickedNewsFeedScreen(),
+                reverseDuration: Duration(milliseconds: 500),
+                duration: Duration(milliseconds: 500),
                 settings: settings,
               );
               break;
