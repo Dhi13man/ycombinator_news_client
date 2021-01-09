@@ -130,7 +130,7 @@ class LoginButtons extends StatelessWidget {
               alignment: Alignment.center,
               color: _buttonForegroundColor(true),
               child: Text(
-                'Use without Signing In',
+                'Use Locally without Sign-in',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,

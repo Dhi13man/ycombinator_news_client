@@ -15,6 +15,7 @@ Future<void> initializeDb() async {
     Hive.init(documentDirectory);
   }
 
-  // Register necessary Data Adapter for Hive
-  Hive.registerAdapter<StoreablePostData>(StoreablePostDataAdapter());
+  // Register necessary Data Adapter for Hive, if not Registered.
+  if (!Hive.isAdapterRegistered(0))
+    Hive.registerAdapter<StoreablePostData>(StoreablePostDataAdapter());
 }

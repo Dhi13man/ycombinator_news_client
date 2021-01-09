@@ -14,7 +14,6 @@ class PostDataHiveDatabaseHandler {
 
     Box<StoreablePostData> box =
         await Hive.openBox<StoreablePostData>('clickedPosts');
-
     StoreablePostData temp = StoreablePostData(
       clicks: postData.clicks,
       lastClickTime: postData.lastClickTime,
@@ -34,22 +33,24 @@ class PostDataHiveDatabaseHandler {
     if (box.isOpen) box.close();
   }
 
+  static Future<int> clearBox() async {
+    Box<StoreablePostData> box =
+        await Hive.openBox<StoreablePostData>('clickedPosts');
+    int out = await box.clear();
+    box.close();
+    return out;
+  }
+
   static Stream<List<StoreablePostData>> watchPostDataFromBox() async* {
     Box<StoreablePostData> box =
         await Hive.openBox<StoreablePostData>('clickedPosts');
-    List<StoreablePostData> out = [];
 
-    box.watch().map(
-      (_) async* {
-        out = box.values;
-        yield out;
-      },
-    );
-
-    yield out;
+    yield* box.watch().map((e) {
+      return box.values.toList();
+    });
   }
 
-  static Future<Map<int, StoreablePostData>> getPostDataFromBox() async {
+  static Future<Map<dynamic, StoreablePostData>> getPostDataFromBox() async {
     Box<StoreablePostData> box =
         await Hive.openBox<StoreablePostData>('clickedPosts');
     return box.toMap();

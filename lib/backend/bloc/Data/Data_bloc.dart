@@ -1,4 +1,3 @@
-import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:bloc/bloc.dart';
@@ -68,7 +67,7 @@ class DataBloc extends Cubit<DataState> {
   /// Stream from Database.
   ///
   /// Returns [Stream<DocumentSnapshot>] when Firebase is in use.
-  /// Returns [Stream<List<PostData>>] when Local Database is in use.
+  /// Returns [Stream<List<StoreablePostData>>] when Local Database is in use.
   Stream<dynamic> documentStream() {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
       // Handle Firebase-less local application
@@ -86,15 +85,17 @@ class DataBloc extends Cubit<DataState> {
   /// Get from Database
   ///
   /// Returns [Future<DocumentSnapshot>] when Firebase is in use.
-  /// Returns [Future<List<PostData>>] when Local Database is in use.
-  Future<dynamic> documentCheck() {
+  /// Returns [Future<List<StoreablePostData>>] when Local Database is in use.
+  Future<dynamic> documentCheck() async {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
       // Handle Firebase-less local application
-      if (isLocalDatabaseInUse)
-        return PostDataHiveDatabaseHandler.getPostDataFromBox();
-
+      if (isLocalDatabaseInUse) {
+        Map<dynamic, StoreablePostData> map =
+            await PostDataHiveDatabaseHandler.getPostDataFromBox();
+        return map.values.toList();
+      }
       InDataState _state = state;
-      return _state.collection.doc('${docToken}_doc').get();
+      return await _state.collection.doc('${docToken}_doc').get();
     } else {
       _initialize();
       return Future.value();
@@ -135,12 +136,12 @@ class DataBloc extends Cubit<DataState> {
 
     // Handle Firebase-less local application
     if (isLocalDatabaseInUse) {
-      Map<int, StoreablePostData> box =
+      Map<dynamic, StoreablePostData> box =
           await PostDataHiveDatabaseHandler.getPostDataFromBox();
 
       Map<int, PostData> postDataList = {};
       box.forEach(
-        (int postID, StoreablePostData element) =>
+        (dynamic postID, StoreablePostData element) =>
             postDataList[postID] = _storeablePostDataToPostData(element),
       );
 
@@ -220,6 +221,26 @@ class DataBloc extends Cubit<DataState> {
       _loginBloc.emit(SignedOutLoginState());
   }
 
+  /// Deletes Given [post] from saved clicked posts.
+  Future<int> clearPostHistory() async {
+    if (_loginBloc.state is SignedInLoginState && state is InDataState) {
+      InDataState _state = state;
+      emit(UnDataState());
+
+      // Handle Firebase-less local application
+      if (isLocalDatabaseInUse) {
+        int out = await PostDataHiveDatabaseHandler.clearBox();
+        emit(_state);
+        return out;
+      }
+
+      CollectionReference reference = _state.collection;
+      await reference.doc('${docToken}_doc').delete();
+      emit(_state);
+    } else
+      _loginBloc.emit(SignedOutLoginState());
+  }
+
   /// Utilities
 
   /// Extracts Database from Firestore and converts it to a list of [PostData]
@@ -275,7 +296,6 @@ class DataBloc extends Cubit<DataState> {
         futurePost: _newsAPIBloc.getPostFromID(id, repeat: 10),
       );
     } catch (e) {
-      print(e);
       return PostData.empty;
     }
   }

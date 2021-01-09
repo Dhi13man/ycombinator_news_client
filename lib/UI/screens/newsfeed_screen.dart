@@ -213,6 +213,54 @@ class NewsFeedBody extends StatelessWidget {
   }
 }
 
+class NumberOfOpenedLinks extends StatelessWidget {
+  const NumberOfOpenedLinks({
+    Key key,
+    @required this.appConstants,
+  }) : super(key: key);
+
+  final AppConstants appConstants;
+
+  @override
+  Widget build(BuildContext context) {
+    DataBloc dataBloc = context.watch<DataBloc>();
+    return FutureBuilder(
+      future: dataBloc.documentCheck(),
+      builder: (BuildContext context, AsyncSnapshot futureSnapshot) {
+        if (!futureSnapshot.hasData)
+          return Text(
+            '...checking Links Opened',
+            style: appConstants.appBarSubTitleTextStyle,
+          );
+        return StreamBuilder(
+          stream: dataBloc.documentStream(),
+          initialData: futureSnapshot.data,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData)
+              return Text(
+                '...checking Links Opened',
+                style: appConstants.appBarSubTitleTextStyle,
+              );
+
+            /// Is a [DocumentSnapshot] when firebase is being used,
+            /// and direct [List<PostData>] when Local Hive Database
+            dynamic docSnap = snapshot.data;
+            List<dynamic> postDataList = [];
+            if (docSnap is List)
+              postDataList = docSnap;
+            else if (docSnap is DocumentSnapshot)
+              postDataList = dataBloc.extractDataFromFirebase(docSnap.data());
+            return Text(
+              '${postDataList.length} Links Opened',
+              style: appConstants.appBarSubTitleTextStyle,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
 class NewsFeedScreen extends StatelessWidget {
   static const routeName = '/newsfeed';
   NewsFeedScreen({Key key, String title}) : super(key: key);
@@ -221,7 +269,6 @@ class NewsFeedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     AppConstants appConstants = context.watch<AppConstants>();
     LoginBloc loginBloc = context.watch<LoginBloc>();
-    DataBloc dataBloc = context.watch<DataBloc>();
 
     return Scaffold(
       backgroundColor: appConstants.getForeGroundColor,
@@ -240,30 +287,7 @@ class NewsFeedScreen extends StatelessWidget {
                   style: appConstants.appBarTitleTextStyle,
                 ),
               ),
-              StreamBuilder(
-                stream: dataBloc.documentStream(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return Text(
-                      '...checking Links Opened',
-                      style: appConstants.appBarSubTitleTextStyle,
-                    );
-
-                  /// Is a [DocumentSnapshot] when firebase is being used,
-                  /// and direct [List<PostData>] when Local Hive Database
-                  dynamic docSnap = snapshot.data;
-                  List<dynamic> postDataList = [];
-                  if (docSnap is List)
-                    postDataList = docSnap;
-                  else if (docSnap is DocumentSnapshot)
-                    postDataList =
-                        dataBloc.extractDataFromFirebase(docSnap.data());
-                  return Text(
-                    '${postDataList.length} Links Opened',
-                    style: appConstants.appBarSubTitleTextStyle,
-                  );
-                },
-              ),
+              NumberOfOpenedLinks(appConstants: appConstants),
             ],
           ),
         ),
