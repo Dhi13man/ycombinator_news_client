@@ -251,7 +251,7 @@ class NumberOfOpenedLinks extends StatelessWidget {
             else if (docSnap is DocumentSnapshot)
               postDataList = dataBloc.extractDataFromFirebase(docSnap.data());
             return Text(
-              '${postDataList.length} Links Opened',
+              '${postDataList.length} Links clicked so far!',
               style: appConstants.appBarSubTitleTextStyle,
             );
           },
@@ -296,7 +296,7 @@ class NewsFeedScreen extends StatelessWidget {
         toolbarHeight: kToolbarHeight,
         leading: AppHeroIcon(
           appConstants: appConstants,
-          iconSize: 20.0,
+          iconSize: 35.0,
           margin: EdgeInsets.symmetric(horizontal: 5),
           padding: EdgeInsets.all(8),
           backgroundColor: Colors.transparent,

@@ -237,8 +237,10 @@ class DataBloc extends Cubit<DataState> {
       CollectionReference reference = _state.collection;
       await reference.doc('${docToken}_doc').delete();
       emit(_state);
+      return 1;
     } else
       _loginBloc.emit(SignedOutLoginState());
+    return 0;
   }
 
   /// Utilities

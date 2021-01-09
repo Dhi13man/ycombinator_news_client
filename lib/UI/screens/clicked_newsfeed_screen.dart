@@ -186,7 +186,7 @@ class ClickedNewsFeedScreen extends StatelessWidget {
         actions: [
           AppHeroIcon(
             appConstants: appConstants,
-            iconSize: 20.0,
+            iconSize: 35.0,
             margin: EdgeInsets.symmetric(horizontal: 0),
             padding: EdgeInsets.all(8),
             backgroundColor: Colors.transparent,
