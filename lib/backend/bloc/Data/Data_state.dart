@@ -53,25 +53,11 @@ class InDataState extends DataState {
 }
 
 /// Error
-abstract class ErrorDataState extends DataState {
+class ErrorDataState extends DataState {
   final String errorMessage;
 
   ErrorDataState(this.errorMessage) : super([errorMessage]);
 
   @override
   String toString() => 'ErrorDataState';
-}
-
-class ReservationExistsErrorDataState extends DataState {
-  final String errorMessage;
-  final DateTime bookedTime;
-
-  ReservationExistsErrorDataState({
-    this.errorMessage,
-    @required this.bookedTime,
-  }) : super([errorMessage]);
-
-  @override
-  String toString() =>
-      'Appointment at ${bookedTime.toIso8601String().replaceAll('T', ' Time: ')} already exists!';
 }

@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:ycombinator_hacker_news/backend/constants.dart';
 
-import 'package:ycombinator_hacker_news/screens/login_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({Key key}) : super(key: key);

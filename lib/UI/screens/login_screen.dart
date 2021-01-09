@@ -7,8 +7,8 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/constants.dart';
 
-import 'package:ycombinator_hacker_news/screens/splash_screen.dart';
-import 'package:ycombinator_hacker_news/screens/newsfeed_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/newsfeed_screen.dart';
 
 class LoginButtons extends StatelessWidget {
   const LoginButtons({

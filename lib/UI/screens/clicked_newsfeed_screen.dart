@@ -8,10 +8,10 @@ import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/constants.dart';
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
-import 'package:ycombinator_hacker_news/screens/login_screen.dart';
-import 'package:ycombinator_hacker_news/screens/newsfeed_screen.dart';
-import 'package:ycombinator_hacker_news/screens/splash_screen.dart';
-import 'package:ycombinator_hacker_news/screens/sort_bars.dart';
+import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/newsfeed_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
+import 'package:ycombinator_hacker_news/UI/app_bars.dart';
 
 class ClickedNewsFeedList extends StatelessWidget {
   const ClickedNewsFeedList({Key key}) : super(key: key);
@@ -130,58 +130,38 @@ class ClickedNewsFeedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppConstants _appConstants = context.watch<AppConstants>();
-    LoginBloc _loginBloc = context.watch<LoginBloc>();
+    AppConstants appConstants = context.watch<AppConstants>();
 
     return Scaffold(
-      backgroundColor: _appConstants.getForeGroundColor,
+      backgroundColor: appConstants.getForeGroundColor,
       appBar: AppBar(
-        title: GestureDetector(
-          onTap: () => Navigator.pushNamed(
-            context,
-            ClickedNewsFeedScreen.routeName,
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  'News Feed',
-                  style: TextStyle(color: _appConstants.getBackGroundColor),
-                ),
-              ),
-              Text(
-                '0 Links Opened',
-                style: TextStyle(
-                  color: _appConstants.getBackGroundColor,
-                  fontSize: 9,
-                ),
-              ),
-            ],
+        title: Container(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          child: Text(
+            'Clicked News Stories',
+            style: appConstants.appBarTitleTextStyle.copyWith(fontSize: 18),
           ),
         ),
-        backgroundColor: _appConstants.getForeGroundColor,
+        backgroundColor: appConstants.getForeGroundColor,
         centerTitle: true,
         toolbarHeight: kToolbarHeight,
-        leading: AppHeroIcon(
-          appConstants: _appConstants,
-          iconSize: 20.0,
-          margin: EdgeInsets.symmetric(horizontal: 5),
-          padding: EdgeInsets.all(8),
-          backgroundColor: _appConstants.getBackGroundColor.withOpacity(0.7),
-          foregroundColor: _appConstants.getForeGroundColor,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back_sharp),
+          color: appConstants.getBackGroundColor,
         ),
         actions: [
-          TextButton(
-            onPressed: () => _loginBloc.signOut(),
-            child: Text(
-              'Log out',
-              style: TextStyle(color: _appConstants.getBackGroundColor),
-            ),
-          )
+          AppHeroIcon(
+            appConstants: appConstants,
+            iconSize: 20.0,
+            margin: EdgeInsets.symmetric(horizontal: 5),
+            padding: EdgeInsets.all(8),
+            backgroundColor: appConstants.getBackGroundColor.withOpacity(0.7),
+            foregroundColor: appConstants.getForeGroundColor,
+          ),
         ],
         elevation: 1,
-        shadowColor: _appConstants.getLighterForeGroundColor,
+        shadowColor: appConstants.getLighterForeGroundColor,
       ),
       body: BlocListener<LoginBloc, LoginState>(
         cubit: BlocProvider.of<LoginBloc>(context),
@@ -192,7 +172,7 @@ class ClickedNewsFeedScreen extends StatelessWidget {
             );
           }
         },
-        child: ClickedNewsFeedBody(appConstants: _appConstants),
+        child: ClickedNewsFeedBody(appConstants: appConstants),
       ),
     );
   }

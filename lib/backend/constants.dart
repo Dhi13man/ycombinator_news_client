@@ -10,7 +10,8 @@ class AppConstants extends ChangeNotifier {
     findTheme();
   }
 
-  /// Getters
+  // Getters
+  // Theme Data
   bool get isThemeLight => _isThemeLight;
 
   MaterialColor get getForeGroundColor =>
@@ -24,15 +25,22 @@ class AppConstants extends ChangeNotifier {
 
   Color get getBackGroundColor => (_isThemeLight) ? Colors.white : Colors.black;
 
-  /// Styles
+  // Styles
+  TextStyle get listItemTextStyle => TextStyle(
+        color: getForeGroundColor,
+        fontWeight: FontWeight.w500,
+      );
+
   TextStyle get listItemSubTextStyle => TextStyle(
         color: getForeGroundColor,
         fontSize: 10,
       );
 
-  TextStyle get listItemTextStyle => TextStyle(
-        color: getForeGroundColor,
-        fontWeight: FontWeight.w500,
+  TextStyle get appBarTitleTextStyle => TextStyle(color: getBackGroundColor);
+
+  TextStyle get appBarSubTitleTextStyle => TextStyle(
+        color: getBackGroundColor,
+        fontSize: 12,
       );
 
   /// Other Functions

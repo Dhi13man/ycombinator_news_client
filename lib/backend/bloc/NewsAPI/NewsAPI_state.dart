@@ -34,9 +34,8 @@ class InNewsAPIState extends NewsAPIState {
   static const String viewByBest = 'Best';
   static const String viewByTop = 'Top';
 
-  InNewsAPIState({
-    String criteria = 'Top',
-  })  : selectedCriteriaButtonText = criteria,
+  InNewsAPIState({String criteria = 'Top'})
+      : selectedCriteriaButtonText = criteria,
         super([criteria]) {
     _saveSortingPreferences();
   }

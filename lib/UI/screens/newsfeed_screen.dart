@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_bloc.dart';
@@ -9,10 +10,10 @@ import 'package:ycombinator_hacker_news/backend/bloc/NewsAPI/NewsAPI_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/constants.dart';
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
-import 'package:ycombinator_hacker_news/screens/clicked_newsfeed_screen.dart';
-import 'package:ycombinator_hacker_news/screens/login_screen.dart';
-import 'package:ycombinator_hacker_news/screens/splash_screen.dart';
-import 'package:ycombinator_hacker_news/screens/sort_bars.dart';
+import 'package:ycombinator_hacker_news/UI/screens/clicked_newsfeed_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
+import 'package:ycombinator_hacker_news/UI/app_bars.dart';
 
 class NewsFeedListItem extends StatelessWidget {
   const NewsFeedListItem({
@@ -38,26 +39,25 @@ class NewsFeedListItem extends StatelessWidget {
     // Final check if associated post has no data
     if (post == null) return Container();
 
-    return Card(
-      elevation: 10,
-      shadowColor: appConstants.getLighterForeGroundColor,
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: appConstants.getForeGroundColor),
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: appConstants.getForeGroundColor),
+          bottom: BorderSide(color: appConstants.getForeGroundColor),
         ),
-        child: ListTile(
-          onTap:
-              (_isValidUrl(post.url)) ? () => dataBloc.clickPost(post) : null,
-          tileColor: appConstants.getBackGroundColor,
-          isThreeLine: true,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          title: Text(
-            post.title ?? 'error',
-            style: appConstants.listItemTextStyle,
-          ),
-          subtitle: Column(
+      ),
+      child: ListTile(
+        onTap: (_isValidUrl(post.url)) ? () => dataBloc.clickPost(post) : null,
+        tileColor: appConstants.getBackGroundColor,
+        isThreeLine: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        title: Text(
+          post.title ?? 'error',
+          style: appConstants.listItemTextStyle,
+        ),
+        subtitle: Container(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -94,14 +94,19 @@ class NewsFeedList extends StatelessWidget {
         future: _newsBloc.getPosts(),
         builder: (context, snapshot) {
           if (!snapshot.hasData)
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: SpinKitPouringHourglass(
+                color: _appConstants.getForeGroundColor,
+              ),
+            );
 
           List<Future<Post>> futurePosts = snapshot.data;
 
           if (futurePosts.isEmpty)
             return Center(
               child: Text(
-                'News feed Empty!',
+                "News feed Empty!\nCheck connection to Hackernews API!",
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
                   color: _appConstants.getForeGroundColor,
@@ -118,13 +123,15 @@ class NewsFeedList extends StatelessWidget {
                 future: futurePosts[index],
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
-                    return Center(child: CircularProgressIndicator());
+                    return SpinKitWave(
+                      color: _appConstants.getForeGroundColor,
+                    );
 
                   Post thisPost = snapshot.data;
 
                   // Check if post not loaded correctly
                   if (thisPost == null || thisPost.id == -9999999)
-                    return Container();
+                    return Center(child: Container());
                   return NewsFeedListItem(post: thisPost);
                 },
               );
@@ -164,17 +171,34 @@ class NewsFeedBody extends StatelessWidget {
             child: BlocBuilder<NewsAPIBloc, NewsAPIState>(
               builder: (context, state) {
                 // When News API Business Logic Not Ready
-                if (!(state is InNewsAPIState))
+                if (state is UnNewsAPIState)
                   return Center(
-                    child: Text(
-                      'Preparing Feed!',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: _appConstants.getForeGroundColor,
-                      ),
+                    child: SpinKitPouringHourglass(
+                      color: _appConstants.getForeGroundColor,
                     ),
                   );
-                return NewsFeedList();
+                if (state is ErrorNewsAPIState)
+                  return Center(
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.error_outline_outlined,
+                          color: _appConstants.getForeGroundColor,
+                        ),
+                        Text(
+                          'Error during Post Loading From API!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: _appConstants.getForeGroundColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                if (state is InNewsAPIState) return NewsFeedList();
+                return SpinKitPouringHourglass(
+                  color: _appConstants.getForeGroundColor,
+                );
               },
             ),
           ),
@@ -208,7 +232,7 @@ class NewsFeedScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 10),
                 child: Text(
                   'News Feed',
-                  style: TextStyle(color: appConstants.getBackGroundColor),
+                  style: appConstants.appBarTitleTextStyle,
                 ),
               ),
               StreamBuilder(
@@ -217,20 +241,14 @@ class NewsFeedScreen extends StatelessWidget {
                   if (!snapshot.hasData)
                     return Text(
                       '...checking Links Opened',
-                      style: TextStyle(
-                        color: appConstants.getBackGroundColor,
-                        fontSize: 9,
-                      ),
+                      style: appConstants.appBarSubTitleTextStyle,
                     );
                   DocumentSnapshot docSnap = snapshot.data;
                   List<PostData> postDataList =
                       dataBloc.extractDataFromFirebase(docSnap.data());
                   return Text(
                     '${postDataList.length} Links Opened',
-                    style: TextStyle(
-                      color: appConstants.getBackGroundColor,
-                      fontSize: 9,
-                    ),
+                    style: appConstants.appBarSubTitleTextStyle,
                   );
                 },
               ),

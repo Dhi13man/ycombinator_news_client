@@ -8,10 +8,10 @@ import 'package:ycombinator_hacker_news/backend/bloc/NewsAPI/NewsAPI_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/constants.dart';
 import 'package:ycombinator_hacker_news/backend/repos/authentication.dart';
 
-import 'package:ycombinator_hacker_news/screens/clicked_newsfeed_screen.dart';
-import 'package:ycombinator_hacker_news/screens/splash_screen.dart';
-import 'package:ycombinator_hacker_news/screens/login_screen.dart';
-import 'package:ycombinator_hacker_news/screens/newsfeed_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/clicked_newsfeed_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/newsfeed_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

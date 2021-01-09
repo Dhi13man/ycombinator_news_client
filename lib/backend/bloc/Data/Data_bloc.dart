@@ -157,6 +157,7 @@ class DataBloc extends Cubit<DataState> {
       await reference
           .doc('${docToken}_doc')
           .update({'${post.id}': FieldValue.delete()});
+      emit(_state);
     } else
       _loginBloc.emit(SignedOutLoginState());
   }

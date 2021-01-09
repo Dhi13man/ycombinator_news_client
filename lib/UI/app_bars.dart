@@ -114,7 +114,7 @@ class NewsAPICriteriaSelectBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppConstants _appConstants = context.watch<AppConstants>();
+    AppConstants appConstants = context.watch<AppConstants>();
     NewsAPIBloc newsAPIBloc = context.watch<NewsAPIBloc>();
     String selectedCriteriaButtonText = InNewsAPIState.viewByTop;
 
@@ -127,13 +127,14 @@ class NewsAPICriteriaSelectBar extends StatelessWidget {
       height: 30,
       margin: EdgeInsets.all(10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             alignment: Alignment.centerLeft,
             child: Text(
               'View Posts: ',
               style: TextStyle(
-                color: _appConstants.getForeGroundColor,
+                color: appConstants.getForeGroundColor,
               ),
             ),
           ),
@@ -152,7 +153,45 @@ class NewsAPICriteriaSelectBar extends StatelessWidget {
             rebuildFunction: newsAPIBloc.reloadPosts,
             selectedCriteriaButtonText: selectedCriteriaButtonText,
           ),
+          ReloadPostsButton(
+            rebuildFunction: newsAPIBloc.reloadPosts,
+            selectedCriteriaButtonText: selectedCriteriaButtonText,
+            appConstants: appConstants,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class ReloadPostsButton extends StatelessWidget {
+  const ReloadPostsButton({
+    Key key,
+    @required Function({String filter, bool isAscending}) rebuildFunction,
+    @required this.selectedCriteriaButtonText,
+    @required this.appConstants,
+  })  : _rebuildClickedPostsStream = rebuildFunction,
+        super(key: key);
+
+  final void Function({String filter, bool isAscending})
+      _rebuildClickedPostsStream;
+  final String selectedCriteriaButtonText;
+  final AppConstants appConstants;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        alignment: Alignment.topRight,
+        child: IconButton(
+          onPressed: () => _rebuildClickedPostsStream(
+            filter: selectedCriteriaButtonText,
+          ),
+          padding: const EdgeInsets.only(bottom: 2),
+          icon: Icon(Icons.refresh),
+          iconSize: 30,
+          color: appConstants.getForeGroundColor,
+        ),
       ),
     );
   }
