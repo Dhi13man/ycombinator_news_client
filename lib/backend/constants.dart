@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 export 'package:provider/provider.dart';
 
 class AppConstants extends ChangeNotifier {
-  bool _isThemeLight = true;
+  bool _isThemeLight = false;
 
   AppConstants() {
     findTheme();
@@ -43,10 +43,15 @@ class AppConstants extends ChangeNotifier {
         fontSize: 12,
       );
 
+  TextStyle get textStyleBodyMessage => TextStyle(
+        fontSize: 18,
+        color: getForeGroundColor,
+      );
+
   /// Other Functions
   void findTheme() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _isThemeLight = prefs.getBool('isThemeLight') ?? true;
+    _isThemeLight = prefs.getBool('isThemeLight') ?? false;
 
     await prefs.setBool('isThemeLight', _isThemeLight);
     notifyListeners();

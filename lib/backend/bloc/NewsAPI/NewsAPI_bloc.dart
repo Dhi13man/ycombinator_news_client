@@ -132,7 +132,7 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
     if (state is InNewsAPIState) {
       InNewsAPIState _state = state;
       emit(UnNewsAPIState());
-      Future.delayed(Duration(milliseconds: 500)).then(
+      Future.delayed(Duration(milliseconds: 100)).then(
         (_) => emit(
           InNewsAPIState(
             criteria: filter ?? _state.criteria,

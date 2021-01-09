@@ -13,10 +13,9 @@ import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
 import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 import 'package:ycombinator_hacker_news/UI/screens/newsfeed_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppConstants _appConstants = AppConstants();
-
   runApp(
     ChangeNotifierProvider<AppConstants>.value(
       value: _appConstants,

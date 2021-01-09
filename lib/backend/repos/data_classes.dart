@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
 import 'package:meta/meta.dart';
+
+part 'data_classes.g.dart';
 
 /// Comment model
 ///
@@ -99,17 +102,44 @@ class PostData {
     lastClickTime: DateTime.now(),
   );
 
-  Future<Post> futurePost;
-  int clicks;
-  DateTime lastClickTime;
+  /// Associated post as a loading Future..
+  final Future<Post> futurePost;
+
+  /// Number of Times Post Clicked.
+  final int clicks;
+
+  /// Last time this Post was Clicked.
+  final DateTime lastClickTime;
+}
+
+/// Class Representing Storable Post Data for Hive compatibility.
+///
+/// properties include [postID], [clicks], [lastClickTime].
+@HiveType(typeId: 0)
+class StoreablePostData {
+  /// Ycombinator Hacker News post ID.
+  @HiveField(0)
+  final int postID;
+
+  /// Number of Times Post Clicked.
+  @HiveField(1)
+  final int clicks;
+
+  /// Last time this Post was Clicked.
+  @HiveField(2)
+  final DateTime lastClickTime;
+
+  const StoreablePostData({
+    @required this.postID,
+    @required this.clicks,
+    @required this.lastClickTime,
+  });
 }
 
 /// User model
 ///
 /// [User.empty] represents an unauthenticated user.
-/// {@endtemplate}
 class User extends Equatable {
-  /// {@macro user}
   const User({
     this.name,
     @required this.email,

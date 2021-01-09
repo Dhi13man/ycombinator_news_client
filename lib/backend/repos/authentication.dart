@@ -43,13 +43,29 @@ class AuthenticationRepository {
     });
   }
 
+  Future<firebase_auth.UserCredential> logInAnonymous({
+    bool persists = true,
+  }) async {
+    try {
+      if (kIsWeb)
+        _firebaseAuth.setPersistence(
+          (persists)
+              ? firebase_auth.Persistence.LOCAL
+              : firebase_auth.Persistence.NONE,
+        );
+      return await _firebaseAuth.signInAnonymously();
+    } on Exception {
+      throw SignUpFailure();
+    }
+  }
+
   /// Creates a new user with the provided [email] and [password].
   ///
   /// Throws a [SignUpFailure] if an exception occurs.
   Future<firebase_auth.UserCredential> signUp({
     @required String email,
     @required String password,
-    bool persists = false,
+    bool persists = true,
   }) async {
     assert(email != null && password != null);
     try {
@@ -72,7 +88,7 @@ class AuthenticationRepository {
   ///
   /// Throws a [LogInWithGoogleFailure] if an exception occurs.
   Future<firebase_auth.UserCredential> logInWithGoogle(
-      {bool persists = false}) async {
+      {bool persists = true}) async {
     try {
       final googleUser = await _googleSignIn.signIn();
       final googleAuth = await googleUser.authentication;
@@ -98,7 +114,7 @@ class AuthenticationRepository {
   Future<firebase_auth.UserCredential> logInWithEmailAndPassword({
     @required String email,
     @required String password,
-    bool persists = false,
+    bool persists = true,
   }) async {
     assert(email != null && password != null);
     try {

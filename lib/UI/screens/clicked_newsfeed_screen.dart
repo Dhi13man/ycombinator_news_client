@@ -1,7 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_bloc.dart';
@@ -26,12 +27,32 @@ class ClickedNewsFeedList extends StatelessWidget {
       child: StreamBuilder(
         stream: dataBloc.documentStream(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
-            return Center(child: CircularProgressIndicator());
+          if (dataBloc.state is UnDataState || !snapshot.hasData)
+            return Center(
+              child: SpinKitPouringHourglass(
+                color: appConstants.getForeGroundColor,
+                size: 100,
+              ),
+            );
 
-          DocumentSnapshot docSnap = snapshot.data;
+          /// Is a [DocumentSnapshot] when firebase is being used,
+          /// and direct [List<PostData>] when Local Hive Database
+          dynamic docSnap = snapshot.data;
+
+          // Convert to common format.
           List<PostData> postDataList =
-              dataBloc.extractDataFromFirebase(docSnap.data());
+              dataBloc.extractPostDataFromStoreablePostData(
+            unprocessedData: docSnap,
+          );
+
+          if (postDataList.length == 0)
+            return Center(
+              child: Text(
+                "No Posts Clicked yet!\nClick on Some News Stories!",
+                textAlign: TextAlign.center,
+                style: appConstants.textStyleBodyMessage,
+              ),
+            );
 
           return ListView.builder(
             itemCount: postDataList.length,
@@ -42,7 +63,9 @@ class ClickedNewsFeedList extends StatelessWidget {
                 future: postData.futurePost,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
-                    return Center(child: CircularProgressIndicator());
+                    return SpinKitWave(
+                      color: appConstants.getForeGroundColor,
+                    );
 
                   Post post = snapshot.data;
                   return Row(

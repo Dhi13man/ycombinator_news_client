@@ -38,6 +38,11 @@ dependencies:
   firebase_auth:
   google_sign_in:
 
+  # Hive Local Database
+  hive:
+  hive_flutter:
+  sqflite:
+
   # BLoC pattern
   bloc:
   flutter_bloc:
@@ -54,6 +59,10 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+
+  # For Hive Local Database
+  hive_generator:
+  build_runner:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -1,7 +1,7 @@
-import 'package:bloc/bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_state.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/NewsAPI/NewsAPI_bloc.dart';
+import 'package:ycombinator_hacker_news/backend/hiveDatabase/databaseHandler.dart';
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
 export 'package:ycombinator_hacker_news/backend/bloc/Data/Data_state.dart';
@@ -38,11 +39,13 @@ class DataBloc extends Cubit<DataState> {
   String get docToken {
     if (_loginBloc.state is SignedInLoginState) {
       SignedInLoginState _loginState = _loginBloc.state;
-
-      return _loginState.credential.user.uid.toString();
-    } else
-      return 'default_doc';
+      if (_loginState.credential != null)
+        return _loginState.credential.user?.uid.toString();
+    }
+    return 'default_doc';
   }
+
+  bool get isLocalDatabaseInUse => docToken.compareTo('default_doc') == 0;
 
   void _initialize() async {
     await _firestore.enableNetwork();
@@ -62,9 +65,16 @@ class DataBloc extends Cubit<DataState> {
     ));
   }
 
-  /// Stream from Firestore
-  Stream<DocumentSnapshot> documentStream() {
+  /// Stream from Database.
+  ///
+  /// Returns [Stream<DocumentSnapshot>] when Firebase is in use.
+  /// Returns [Stream<List<PostData>>] when Local Database is in use.
+  Stream<dynamic> documentStream() {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
+      // Handle Firebase-less local application
+      if (isLocalDatabaseInUse)
+        return PostDataHiveDatabaseHandler.watchPostDataFromBox();
+
       InDataState _state = state;
       return _state.collection.doc('${docToken}_doc').snapshots();
     } else {
@@ -73,9 +83,16 @@ class DataBloc extends Cubit<DataState> {
     }
   }
 
-  /// Get from Firestore
-  Future<DocumentSnapshot> documentCheck() {
+  /// Get from Database
+  ///
+  /// Returns [Future<DocumentSnapshot>] when Firebase is in use.
+  /// Returns [Future<List<PostData>>] when Local Database is in use.
+  Future<dynamic> documentCheck() {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
+      // Handle Firebase-less local application
+      if (isLocalDatabaseInUse)
+        return PostDataHiveDatabaseHandler.getPostDataFromBox();
+
       InDataState _state = state;
       return _state.collection.doc('${docToken}_doc').get();
     } else {
@@ -115,6 +132,24 @@ class DataBloc extends Cubit<DataState> {
   /// Returns how many time [Post] of id [postID] has been clicked so far
   Future<int> _timesPostClickedEarlier(int postID) async {
     String postKey = postID.toString();
+
+    // Handle Firebase-less local application
+    if (isLocalDatabaseInUse) {
+      Map<int, StoreablePostData> box =
+          await PostDataHiveDatabaseHandler.getPostDataFromBox();
+
+      Map<int, PostData> postDataList = {};
+      box.forEach(
+        (int postID, StoreablePostData element) =>
+            postDataList[postID] = _storeablePostDataToPostData(element),
+      );
+
+      if (!postDataList.containsKey(postID)) return 0;
+      return postDataList[postID].clicks;
+    }
+
+    // Will break if somehow this code executes in Local Database mode,
+    // shouldn't happen in normal conditions.
     DocumentSnapshot snap = await documentCheck();
     Map<String, dynamic> currentData = snap.data();
 
@@ -126,8 +161,22 @@ class DataBloc extends Cubit<DataState> {
   Future<bool> addPost(Post post) async {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
       InDataState _state = state;
-      DocumentReference reference = _state.collection.doc('${docToken}_doc');
       int clickedTimes = await _timesPostClickedEarlier(post.id);
+
+      // Handle Firebase-less local application
+      if (isLocalDatabaseInUse) {
+        await PostDataHiveDatabaseHandler.writeToDB(
+          postID: post.id,
+          postData: PostData(
+            clicks: clickedTimes + 1,
+            lastClickTime: DateTime.now(),
+            futurePost: Future.value(post),
+          ),
+        );
+        return true;
+      }
+
+      DocumentReference reference = _state.collection.doc('${docToken}_doc');
 
       if (clickedTimes > 0) {
         Map<String, dynamic> _editedMappedPost = clickedPostToMap(post);
@@ -153,6 +202,15 @@ class DataBloc extends Cubit<DataState> {
   Future<void> deletePostFromHistory(Post post) async {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
       InDataState _state = state;
+      emit(UnDataState());
+
+      // Handle Firebase-less local application
+      if (isLocalDatabaseInUse) {
+        await PostDataHiveDatabaseHandler.deletePostData(postID: post.id);
+        emit(_state);
+        return;
+      }
+
       CollectionReference reference = _state.collection;
       await reference
           .doc('${docToken}_doc')
@@ -220,6 +278,36 @@ class DataBloc extends Cubit<DataState> {
       print(e);
       return PostData.empty;
     }
+  }
+
+  /// Utility Function to convert [StoreablePostData] to [PostData]
+  PostData _storeablePostDataToPostData(StoreablePostData storeablePostData) =>
+      PostData(
+        clicks: storeablePostData.clicks,
+        futurePost: _newsAPIBloc.getPostFromID(storeablePostData.postID),
+        lastClickTime: storeablePostData.lastClickTime,
+      );
+
+  /// Utility function that converts Firebase and Hive Database output types into [List<PostData>].
+  ///
+  /// Input [unprocessedData] may either be [List<StoreablePostData>] or [DocumentSnapshot].
+  List<PostData> extractPostDataFromStoreablePostData(
+      {@required dynamic unprocessedData}) {
+    // Ensure proper input
+    assert(unprocessedData != null);
+    if (unprocessedData is List) {
+      List<StoreablePostData> temp = unprocessedData;
+      List<PostData> out = [];
+
+      temp.forEach(
+        (StoreablePostData element) =>
+            out.add(_storeablePostDataToPostData(element)),
+      );
+      return out;
+    } else if (unprocessedData is DocumentSnapshot)
+      return extractDataFromFirebase(unprocessedData.data());
+    else
+      throw ("Improper input!");
   }
 
   /// Reformat Date String to look Readable

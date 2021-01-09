@@ -40,6 +40,8 @@ class NewsFeedListItem extends StatelessWidget {
     if (post == null) return Container();
 
     return Container(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: appConstants.getForeGroundColor),
@@ -84,36 +86,35 @@ class NewsFeedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    NewsAPIBloc _newsBloc = context.watch<NewsAPIBloc>();
-    AppConstants _appConstants = context.watch<AppConstants>();
+    NewsAPIBloc newsBloc = context.watch<NewsAPIBloc>();
+    AppConstants appConstants = context.watch<AppConstants>();
 
     // News API Business Logic Ready
     return Container(
       // To Load Complete News Feed (List of Posts) based on current chosen criteria.
       child: FutureBuilder(
-        future: _newsBloc.getPosts(),
+        future: newsBloc.getPosts(),
         builder: (context, snapshot) {
           if (!snapshot.hasData)
             return Center(
               child: SpinKitPouringHourglass(
-                color: _appConstants.getForeGroundColor,
+                color: appConstants.getForeGroundColor,
+                size: 100,
               ),
             );
 
           List<Future<Post>> futurePosts = snapshot.data;
 
-          if (futurePosts.isEmpty)
-            return Center(
-              child: Text(
-                "News feed Empty!\nCheck connection to Hackernews API!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  color: _appConstants.getForeGroundColor,
-                ),
-              ),
-            );
+          Widget noValidPostsRecievedMessage = Center(
+            child: Text(
+              "News feed Empty!\nCheck connection to Hackernews API!",
+              textAlign: TextAlign.center,
+              style: appConstants.textStyleBodyMessage,
+            ),
+          );
+          if (futurePosts.isEmpty) return noValidPostsRecievedMessage;
 
+          int countCorruptedPosts = 0; // Ideally zero
           return ListView.builder(
             itemCount: futurePosts.length,
             cacheExtent: MediaQuery.of(context).size.height,
@@ -124,14 +125,17 @@ class NewsFeedList extends StatelessWidget {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
                     return SpinKitWave(
-                      color: _appConstants.getForeGroundColor,
+                      color: appConstants.getForeGroundColor,
                     );
 
                   Post thisPost = snapshot.data;
 
                   // Check if post not loaded correctly
-                  if (thisPost == null || thisPost.id == -9999999)
+                  if (thisPost == null || thisPost.id == -9999999) {
+                    if (++countCorruptedPosts == futurePosts.length)
+                      return noValidPostsRecievedMessage;
                     return Center(child: Container());
+                  }
                   return NewsFeedListItem(post: thisPost);
                 },
               );
@@ -175,6 +179,7 @@ class NewsFeedBody extends StatelessWidget {
                   return Center(
                     child: SpinKitPouringHourglass(
                       color: _appConstants.getForeGroundColor,
+                      size: 100,
                     ),
                   );
                 if (state is ErrorNewsAPIState)
@@ -243,9 +248,16 @@ class NewsFeedScreen extends StatelessWidget {
                       '...checking Links Opened',
                       style: appConstants.appBarSubTitleTextStyle,
                     );
-                  DocumentSnapshot docSnap = snapshot.data;
-                  List<PostData> postDataList =
-                      dataBloc.extractDataFromFirebase(docSnap.data());
+
+                  /// Is a [DocumentSnapshot] when firebase is being used,
+                  /// and direct [List<PostData>] when Local Hive Database
+                  dynamic docSnap = snapshot.data;
+                  List<dynamic> postDataList = [];
+                  if (docSnap is List)
+                    postDataList = docSnap;
+                  else if (docSnap is DocumentSnapshot)
+                    postDataList =
+                        dataBloc.extractDataFromFirebase(docSnap.data());
                   return Text(
                     '${postDataList.length} Links Opened',
                     style: appConstants.appBarSubTitleTextStyle,

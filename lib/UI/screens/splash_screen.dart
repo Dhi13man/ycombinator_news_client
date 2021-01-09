@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'package:ycombinator_hacker_news/backend/constants.dart';
+import 'package:ycombinator_hacker_news/backend/hiveDatabase/shared.dart';
 
 import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 
@@ -13,8 +14,13 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppConstants _appConstants = context.watch<AppConstants>();
-    Firebase.initializeApp().then(
-      (value) => Navigator.pushReplacementNamed(context, LoginScreen.routeName),
+    Future.wait(
+      [
+        Firebase.initializeApp(),
+        initializeDb(), // For Local Hive Database Working
+      ],
+    ).then(
+      (_) => Navigator.pushReplacementNamed(context, LoginScreen.routeName),
     );
 
     return Scaffold(
