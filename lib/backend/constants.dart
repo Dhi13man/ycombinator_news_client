@@ -39,12 +39,12 @@ class AppConstants extends ChangeNotifier {
   TextStyle get textStyleAppBarTitle => TextStyle(
         color: getBackGroundColor,
         fontWeight: FontWeight.w600,
-        fontSize: 20,
+        fontSize: 18,
       );
 
   TextStyle get textStyleAppBarSubTitle => TextStyle(
-        color: getBackGroundColor,
-        fontSize: 12,
+        color: getForeGroundColor,
+        fontSize: 10,
       );
 
   TextStyle get textStyleBodyMessage => TextStyle(

@@ -63,12 +63,9 @@ class NewsFeedListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Fun little Animation when Post tapped and opened.
-              Hero(
-                tag: '${post.id}_${post.postedTime.toIso8601String()}_post',
-                child: Text(
-                  'By: ${post.postedBy}, $numCommentsText' ?? '',
-                  style: appConstants.textStyleSubListItem,
-                ),
+              Text(
+                'By: ${post.postedBy}, $numCommentsText' ?? '',
+                style: appConstants.textStyleSubListItem,
               ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -227,39 +224,47 @@ class NumberOfOpenedLinks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DataBloc dataBloc = context.watch<DataBloc>();
-    return FutureBuilder(
-      future: dataBloc.documentCheck(),
-      builder: (BuildContext context, AsyncSnapshot futureSnapshot) {
-        if (!futureSnapshot.hasData)
-          return Text(
-            '...checking Links Opened',
-            style: appConstants.textStyleAppBarSubTitle,
-          );
-        return StreamBuilder(
-          stream: dataBloc.documentStream(),
-          initialData: futureSnapshot.data,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData)
-              return Text(
-                '...checking Links Opened',
-                style: appConstants.textStyleAppBarSubTitle,
-              );
-
-            /// Is a [DocumentSnapshot] when firebase is being used,
-            /// and direct [List<PostData>] when Local Hive Database
-            dynamic docSnap = snapshot.data;
-            List<dynamic> postDataList = [];
-            if (docSnap is List)
-              postDataList = docSnap;
-            else if (docSnap is DocumentSnapshot)
-              postDataList = dataBloc.extractDataFromFirebase(docSnap.data());
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 3, horizontal: 8),
+      margin: EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: appConstants.getBackGroundColor,
+      ),
+      child: FutureBuilder(
+        future: dataBloc.documentCheck(),
+        builder: (BuildContext context, AsyncSnapshot futureSnapshot) {
+          if (!futureSnapshot.hasData)
             return Text(
-              '${postDataList.length} Links clicked so far!',
+              '...checking Links Opened',
               style: appConstants.textStyleAppBarSubTitle,
             );
-          },
-        );
-      },
+          return StreamBuilder(
+            stream: dataBloc.documentStream(),
+            initialData: futureSnapshot.data,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData)
+                return Text(
+                  '...checking Links Opened',
+                  style: appConstants.textStyleAppBarSubTitle,
+                );
+
+              /// Is a [DocumentSnapshot] when firebase is being used,
+              /// and direct [List<PostData>] when Local Hive Database
+              dynamic docSnap = snapshot.data;
+              List<dynamic> postDataList = [];
+              if (docSnap is List)
+                postDataList = docSnap;
+              else if (docSnap is DocumentSnapshot)
+                postDataList = dataBloc.extractDataFromFirebase(docSnap.data());
+              return Text(
+                '${postDataList.length} Links clicked so far!',
+                style: appConstants.textStyleAppBarSubTitle,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -306,7 +311,7 @@ class NewsFeedScreen extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(vertical: 10),
+                padding: EdgeInsets.only(top: 10),
                 child: Text(
                   'News Feed',
                   style: appConstants.textStyleAppBarTitle,

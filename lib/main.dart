@@ -163,6 +163,7 @@ class ReservationApp extends StatelessWidget {
                   },
                 ),
                 type: PageTransitionType.scale,
+                alignment: Alignment.center,
                 childCurrent: ClickedNewsFeedScreen(),
                 reverseDuration: Duration(milliseconds: 500),
                 duration: Duration(milliseconds: 500),

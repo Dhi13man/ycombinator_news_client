@@ -267,13 +267,9 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
                       color: widget.appConstants.getBackGroundColor,
                       iconSize: (_dynamicPadding != _maxPadding) ? 28 : 24,
                     ),
-                    Hero(
-                      tag:
-                          '${widget.viewedPost.id}_${widget.viewedPost.postedTime.toIso8601String()}_post',
-                      child: Text(
-                        'By: ${widget.viewedPost.postedBy}',
-                        style: widget.appConstants.textStyleAppBarTitle,
-                      ),
+                    Text(
+                      'By: ${widget.viewedPost.postedBy}',
+                      style: widget.appConstants.textStyleAppBarTitle,
                     ),
                   ],
                 ),
@@ -282,8 +278,10 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '${widget.viewedPost.title}',
-                    style: widget.appConstants.textStyleAppBarSubTitle
-                        .copyWith(fontSize: 18),
+                    style: TextStyle(
+                      color: widget.appConstants.getBackGroundColor,
+                      fontSize: 18,
+                    ),
                     textAlign: TextAlign.left,
                   ),
                 ),
