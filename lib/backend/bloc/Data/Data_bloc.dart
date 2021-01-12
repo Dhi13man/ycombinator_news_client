@@ -135,23 +135,6 @@ class DataBloc extends Cubit<DataState> {
       );
   }
 
-  /// To implement sorted Post List Building.
-  ///  [filter] specifies what property to sort with from ['Time', 'Number of Clicks']
-  /// List wil be in ascending order if [isAscending] is true
-  void rebuildClickedPostsStream({String filter, bool isAscending}) {
-    if (state is InDataState) {
-      InDataState _state = state;
-      emit(
-        InDataState(
-          collection: _state.collection,
-          criteria: filter ?? _state.criteria,
-          isAscending: isAscending ?? _state.isAscending,
-        ),
-      );
-    } else
-      _initialize();
-  }
-
   /// Returns how many time [Post] of id [postID] has been clicked so far
   Future<int> _timesPostClickedEarlier(int postID) async {
     String postKey = postID.toString();
@@ -202,7 +185,7 @@ class DataBloc extends Cubit<DataState> {
       DocumentReference reference = _state.collection.doc('${docToken}_doc');
 
       if (clickedTimes > 0) {
-        Map<String, dynamic> _editedMappedPost = clickedPostToMap(post);
+        Map<String, dynamic> _editedMappedPost = _clickedPostToMap(post);
         _editedMappedPost[post.id.toString()]['clicks'] = clickedTimes + 1;
 
         await reference.update(_editedMappedPost);
@@ -210,7 +193,7 @@ class DataBloc extends Cubit<DataState> {
       }
 
       await reference.set(
-        clickedPostToMap(post),
+        _clickedPostToMap(post),
         SetOptions(merge: true),
       );
 
@@ -265,19 +248,30 @@ class DataBloc extends Cubit<DataState> {
     return 0;
   }
 
+  /// To implement sorted Post List Building.
+  ///
+  ///  [filter] specifies what property to sort with from ['Time', 'Number of Clicks']
+  /// List wil be in ascending order if [isAscending] is true
+  void rebuildClickedPostsStream({String filter, bool isAscending}) {
+    if (state is InDataState) {
+      InDataState _state = state;
+      Future.delayed(Duration(milliseconds: 5))
+          .then((_) => emit(UnDataState()));
+      emit(
+        InDataState(
+          collection: _state.collection,
+          criteria: filter ?? _state.criteria,
+          isAscending: isAscending ?? _state.isAscending,
+        ),
+      );
+    } else
+      _initialize();
+  }
+
   /// Utilities
 
-  /// Extracts Database from Firestore and converts it to a list of [PostData]
-  List<PostData> extractDataFromFirebase(
-    Map<String, dynamic> firebaseData,
-  ) {
-    List<PostData> postDataList = [];
-    firebaseData?.forEach(
-      (key, value) => postDataList.add(
-        _mapToClickedPost(postID: key, postData: value),
-      ),
-    );
-
+  /// Sorts Post based on criteria in [InNewsState].
+  List<PostData> _sortPostList(List<PostData> postDataList) {
     postDataList.sort(
       (PostData a, PostData b) {
         if (state is InDataState) {
@@ -295,8 +289,22 @@ class DataBloc extends Cubit<DataState> {
     return postDataList;
   }
 
+  /// Extracts Database from Firestore and converts it to a list of [PostData]
+  List<PostData> extractDataFromFirebase(
+    Map<String, dynamic> firebaseData,
+  ) {
+    List<PostData> postDataList = [];
+    firebaseData?.forEach(
+      (key, value) => postDataList.add(
+        _mapToClickedPost(postID: key, postData: value),
+      ),
+    );
+
+    return _sortPostList(postDataList);
+  }
+
   /// Extracts a Map of values from a Reservation Class
-  Map<String, dynamic> clickedPostToMap(Post post) => {
+  Map<String, dynamic> _clickedPostToMap(Post post) => {
         post.id.toString(): {'time': DateTime.now(), 'clicks': 1},
       };
 
@@ -341,13 +349,14 @@ class DataBloc extends Cubit<DataState> {
     assert(unprocessedData != null);
     if (unprocessedData is List) {
       List<StoreablePostData> temp = unprocessedData;
-      List<PostData> out = [];
 
+      // Make necessary Conversions.
+      List<PostData> out = [];
       temp.forEach(
         (StoreablePostData element) =>
             out.add(_storeablePostDataToPostData(element)),
       );
-      return out;
+      return _sortPostList(out);
     } else if (unprocessedData is DocumentSnapshot)
       return extractDataFromFirebase(unprocessedData.data());
     else

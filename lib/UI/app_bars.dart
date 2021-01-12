@@ -48,7 +48,7 @@ class SortButton extends StatelessWidget {
   }
 }
 
-/// Allows user tp sort data extracted from Database (Clicked News Stories)
+/// Allows user to sort data extracted from Database (Clicked News Stories)
 class DataSortBar extends StatelessWidget {
   const DataSortBar({Key key}) : super(key: key);
 
@@ -56,7 +56,22 @@ class DataSortBar extends StatelessWidget {
   Widget build(BuildContext context) {
     AppConstants _appConstants = context.watch<AppConstants>();
     DataBloc dataBloc = context.watch<DataBloc>();
-    bool isAscendingSort = true;
+
+    // Don't build Sort bar unless in proper Data Initialized state.
+    if (dataBloc.state is UnDataState) return Container();
+
+    if (dataBloc.state is ErrorDataState)
+      return Center(
+        child: Text(
+          'Error while Retrieving Data from Database! Check Permissions!',
+          style: _appConstants.textStyleListItem,
+        ),
+      );
+
+    bool isAscendingSort = false;
+    if (dataBloc.state is InDataState)
+      isAscendingSort = (dataBloc.state as InDataState).isAscending;
+
     String selectedCriteriaButtonText = InDataState.sortedByClickTime;
 
     if (dataBloc.state is InDataState) {

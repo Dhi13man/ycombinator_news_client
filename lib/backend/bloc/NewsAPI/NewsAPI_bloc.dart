@@ -173,14 +173,15 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
     }
   }
 
-  /// To implement sorted Post List Building.
-  ///  [filter] specifies what property to sort with from ['Time', 'Number of Clicks']
-  /// List wil be in ascending order if [isAscending] is true
+  /// To choose what kind of posts are to be viewed.
+  ///
+  ///  [filter] specifies what property to sort with from ['New', 'Top', 'Best']
+  /// [isAscending] does nothing and is only there for compatibility.
   void reloadPosts({String filter, bool isAscending}) {
     if (state is InNewsAPIState) {
       InNewsAPIState _state = state;
       emit(UnNewsAPIState());
-      Future.delayed(Duration(milliseconds: 100)).then(
+      Future.delayed(Duration(milliseconds: 5)).then(
         (_) => emit(
           InNewsAPIState(
             criteria: filter ?? _state.criteria,

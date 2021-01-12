@@ -258,24 +258,24 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
             child: Column(
               children: [
                 // To complete Transitions from NewsFeedScreen and ClickedNewsFeedScreen
-                Hero(
-                  tag:
-                      '${widget.viewedPost.id}_${widget.viewedPost.postedTime.toIso8601String()}_post',
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(Icons.arrow_back),
-                        color: widget.appConstants.getBackGroundColor,
-                        iconSize: (_dynamicPadding != _maxPadding) ? 28 : 24,
-                      ),
-                      Text(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(Icons.arrow_back),
+                      color: widget.appConstants.getBackGroundColor,
+                      iconSize: (_dynamicPadding != _maxPadding) ? 28 : 24,
+                    ),
+                    Hero(
+                      tag:
+                          '${widget.viewedPost.id}_${widget.viewedPost.postedTime.toIso8601String()}_post',
+                      child: Text(
                         'By: ${widget.viewedPost.postedBy}',
                         style: widget.appConstants.textStyleAppBarTitle,
-                      )
-                    ],
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
                 Container(
                   padding: EdgeInsets.only(left: 50, right: 15, bottom: 10),
