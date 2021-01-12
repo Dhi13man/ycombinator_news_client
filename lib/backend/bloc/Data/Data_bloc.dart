@@ -255,7 +255,7 @@ class DataBloc extends Cubit<DataState> {
   void rebuildClickedPostsStream({String filter, bool isAscending}) {
     if (state is InDataState) {
       InDataState _state = state;
-      Future.delayed(Duration(milliseconds: 5))
+      Future.delayed(Duration(milliseconds: 30))
           .then((_) => emit(UnDataState()));
       emit(
         InDataState(

@@ -96,7 +96,7 @@ class _CommentsListItemState extends State<CommentsListItem> {
             color: appConstants.getForeGroundColor,
             elevation: 3,
             shadowColor: appConstants.getLighterForeGroundColor[800],
-            margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
             child: Container(
@@ -210,7 +210,7 @@ class ExpandedPostView extends StatefulWidget {
 }
 
 class _ExpandedPostViewState extends State<ExpandedPostView> {
-  final double _basePadding = 20, _maxPadding = 60;
+  final double _basePadding = 30, _maxPadding = 60;
   double _dynamicPadding;
 
   @override
@@ -231,7 +231,7 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
             _dynamicPadding = _maxPadding;
             return;
           } else
-            _dynamicPadding = _basePadding + 5 * details.delta.dy;
+            _dynamicPadding = _basePadding + 2.5 * details.delta.dy;
         },
       ),
       onVerticalDragEnd: (details) {
