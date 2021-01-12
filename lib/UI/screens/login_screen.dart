@@ -186,7 +186,7 @@ class _LoginFormState extends State<LoginForm> {
         borderRadius: BorderRadius.circular(20),
       ),
       elevation: 0,
-      color: widget._appConstants.getLighterForeGroundColor.withOpacity(0.5),
+      color: widget._appConstants.getForeGroundColor.withOpacity(0.5),
       margin: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 15),
       shadowColor: widget._appConstants.getLighterForeGroundColor,
       child: Container(

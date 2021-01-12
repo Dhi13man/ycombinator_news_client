@@ -11,6 +11,7 @@ import 'package:ycombinator_hacker_news/backend/constants.dart';
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
 import 'package:ycombinator_hacker_news/UI/screens/clicked_newsfeed_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/view_post_screen.dart';
 import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
 import 'package:ycombinator_hacker_news/UI/app_bars.dart';
@@ -23,14 +24,6 @@ class NewsFeedListItem extends StatelessWidget {
 
   final Post post;
 
-  bool _isValidUrl(String inputString) {
-    try {
-      return Uri.tryParse(inputString) != null;
-    } catch (_) {
-      return false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     AppConstants appConstants = context.watch<AppConstants>();
@@ -38,6 +31,9 @@ class NewsFeedListItem extends StatelessWidget {
 
     // Final check if associated post has no data
     if (post == null) return Container();
+
+    String numCommentsText = 'with ${post.comments.length} ' +
+        ((post.comments.length != 1) ? 'Comments' : 'Comment');
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -49,28 +45,33 @@ class NewsFeedListItem extends StatelessWidget {
         ),
       ),
       child: ListTile(
-        onTap: (_isValidUrl(post.url)) ? () => dataBloc.clickPost(post) : null,
+        onTap: () => Navigator.of(context)
+            .pushNamed(ViewPostScreen.routeName, arguments: post),
         tileColor: appConstants.getBackGroundColor,
         isThreeLine: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         title: Text(
           post.title ?? 'error',
-          style: appConstants.listItemTextStyle,
+          style: appConstants.textStyleListItem,
         ),
         subtitle: Container(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //Hero(
+              //  tag: '${post.id}_${post.postedTime.toIso8601String()}_post',
+              //child:
               Text(
-                'By: ${post.postedBy}' ?? '',
-                style: appConstants.listItemSubTextStyle,
+                'By: ${post.postedBy}, $numCommentsText' ?? '',
+                style: appConstants.textStyleSubListItem,
               ),
+              //),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Text(
                   'Posted: ${dataBloc.formatDateTime(post.postedTime)}' ?? '',
-                  style: appConstants.listItemSubTextStyle,
+                  style: appConstants.textStyleSubListItem,
                 ),
               ),
             ],
@@ -124,9 +125,7 @@ class NewsFeedList extends StatelessWidget {
                 future: futurePosts[index],
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
-                    return SpinKitWave(
-                      color: appConstants.getForeGroundColor,
-                    );
+                    return SpinKitWave(color: appConstants.getForeGroundColor);
 
                   Post thisPost = snapshot.data;
 
@@ -185,6 +184,7 @@ class NewsFeedBody extends StatelessWidget {
                 if (state is ErrorNewsAPIState)
                   return Center(
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Icon(
                           Icons.error_outline_outlined,
@@ -230,7 +230,7 @@ class NumberOfOpenedLinks extends StatelessWidget {
         if (!futureSnapshot.hasData)
           return Text(
             '...checking Links Opened',
-            style: appConstants.appBarSubTitleTextStyle,
+            style: appConstants.textStyleAppBarSubTitle,
           );
         return StreamBuilder(
           stream: dataBloc.documentStream(),
@@ -239,7 +239,7 @@ class NumberOfOpenedLinks extends StatelessWidget {
             if (!snapshot.hasData)
               return Text(
                 '...checking Links Opened',
-                style: appConstants.appBarSubTitleTextStyle,
+                style: appConstants.textStyleAppBarSubTitle,
               );
 
             /// Is a [DocumentSnapshot] when firebase is being used,
@@ -252,7 +252,7 @@ class NumberOfOpenedLinks extends StatelessWidget {
               postDataList = dataBloc.extractDataFromFirebase(docSnap.data());
             return Text(
               '${postDataList.length} Links clicked so far!',
-              style: appConstants.appBarSubTitleTextStyle,
+              style: appConstants.textStyleAppBarSubTitle,
             );
           },
         );
@@ -273,27 +273,10 @@ class NewsFeedScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: appConstants.getForeGroundColor,
       appBar: AppBar(
-        title: GestureDetector(
-          onTap: () => Navigator.pushNamed(
-            context,
-            ClickedNewsFeedScreen.routeName,
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  'News Feed',
-                  style: appConstants.appBarTitleTextStyle,
-                ),
-              ),
-              NumberOfOpenedLinks(appConstants: appConstants),
-            ],
-          ),
-        ),
         backgroundColor: appConstants.getForeGroundColor,
         centerTitle: true,
         toolbarHeight: kToolbarHeight,
+        elevation: 0,
         leading: AppHeroIcon(
           appConstants: appConstants,
           iconSize: 35.0,
@@ -311,8 +294,24 @@ class NewsFeedScreen extends StatelessWidget {
             ),
           )
         ],
-        elevation: 1,
-        shadowColor: appConstants.getLighterForeGroundColor,
+        title: GestureDetector(
+          onTap: () => Navigator.pushNamed(
+            context,
+            ClickedNewsFeedScreen.routeName,
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  'News Feed',
+                  style: appConstants.textStyleAppBarTitle,
+                ),
+              ),
+              NumberOfOpenedLinks(appConstants: appConstants),
+            ],
+          ),
+        ),
       ),
       body: BlocListener<LoginBloc, LoginState>(
         cubit: loginBloc,

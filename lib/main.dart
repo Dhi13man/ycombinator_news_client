@@ -12,6 +12,7 @@ import 'package:ycombinator_hacker_news/UI/screens/clicked_newsfeed_screen.dart'
 import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
 import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 import 'package:ycombinator_hacker_news/UI/screens/newsfeed_screen.dart';
+import 'package:ycombinator_hacker_news/UI/screens/view_post_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,6 +90,34 @@ class ReservationApp extends StatelessWidget {
               );
               break;
 
+            case NewsFeedScreen.routeName:
+              return PageTransition(
+                child: Builder(
+                  builder: (context) {
+                    return MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider<AppConstants>.value(
+                          value: context.watch<AppConstants>(),
+                        ),
+                        BlocProvider<DataBloc>.value(
+                          value: context.watch<DataBloc>(),
+                        ),
+                        BlocProvider<NewsAPIBloc>.value(
+                          value: context.watch<NewsAPIBloc>(),
+                        )
+                      ],
+                      child: NewsFeedScreen(),
+                    );
+                  },
+                ),
+                type: PageTransitionType.rightToLeftWithFade,
+                childCurrent: ClickedNewsFeedScreen(),
+                reverseDuration: Duration(milliseconds: 500),
+                duration: Duration(milliseconds: 500),
+                settings: settings,
+              );
+              break;
+
             case ClickedNewsFeedScreen.routeName:
               return PageTransition(
                 child: Builder(
@@ -113,7 +142,7 @@ class ReservationApp extends StatelessWidget {
               );
               break;
 
-            case NewsFeedScreen.routeName:
+            case ViewPostScreen.routeName:
               return PageTransition(
                 child: Builder(
                   builder: (context) {
@@ -129,11 +158,11 @@ class ReservationApp extends StatelessWidget {
                           value: context.watch<NewsAPIBloc>(),
                         )
                       ],
-                      child: NewsFeedScreen(),
+                      child: ViewPostScreen(),
                     );
                   },
                 ),
-                type: PageTransitionType.rightToLeftWithFade,
+                type: PageTransitionType.scale,
                 childCurrent: ClickedNewsFeedScreen(),
                 reverseDuration: Duration(milliseconds: 500),
                 duration: Duration(milliseconds: 500),

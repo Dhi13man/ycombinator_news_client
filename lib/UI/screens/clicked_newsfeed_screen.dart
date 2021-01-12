@@ -87,7 +87,7 @@ class ClickedNewsFeedList extends StatelessWidget {
                                 ),
                                 Text(
                                   'Last Clicked: ${dataBloc.formatDateTime(postData.lastClickTime)}',
-                                  style: appConstants.listItemSubTextStyle,
+                                  style: appConstants.textStyleSubListItem,
                                 ),
                               ],
                             ),
@@ -108,7 +108,7 @@ class ClickedNewsFeedList extends StatelessWidget {
                                 ),
                                 Text(
                                   '${postData.clicks} Clicks',
-                                  style: appConstants.listItemTextStyle,
+                                  style: appConstants.textStyleListItem,
                                 ),
                               ],
                             ),
@@ -169,15 +169,9 @@ class ClickedNewsFeedScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: appConstants.getForeGroundColor,
       appBar: AppBar(
-        title: Container(
-          padding: EdgeInsets.symmetric(vertical: 10),
-          child: Text(
-            'Post History',
-            style: appConstants.appBarTitleTextStyle.copyWith(fontSize: 18),
-          ),
-        ),
         backgroundColor: appConstants.getForeGroundColor,
         toolbarHeight: kToolbarHeight,
+        elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: Icon(Icons.arrow_back_sharp),
@@ -201,8 +195,13 @@ class ClickedNewsFeedScreen extends StatelessWidget {
             color: appConstants.getBackGroundColor,
           ),
         ],
-        elevation: 1,
-        shadowColor: appConstants.getLighterForeGroundColor,
+        title: Container(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          child: Text(
+            'Post History',
+            style: appConstants.textStyleAppBarTitle.copyWith(fontSize: 18),
+          ),
+        ),
       ),
       body: BlocListener<LoginBloc, LoginState>(
         cubit: BlocProvider.of<LoginBloc>(context),

@@ -17,28 +17,32 @@ class AppConstants extends ChangeNotifier {
   MaterialColor get getForeGroundColor =>
       (_isThemeLight) ? Colors.indigo : Colors.amber;
 
-  Color get getLighterForeGroundColor =>
-      (_isThemeLight) ? Colors.blue : Color.fromARGB(0, 252, 163, 17);
+  MaterialColor get getLighterForeGroundColor =>
+      (_isThemeLight) ? Colors.blue : Colors.yellow;
 
   Color get getLighterBackGroundColor =>
-      (_isThemeLight) ? Color.fromRGBO(20, 33, 61, 1) : Colors.indigo[900];
+      (_isThemeLight) ? Colors.indigo[900] : Colors.grey[800];
 
   Color get getBackGroundColor => (_isThemeLight) ? Colors.white : Colors.black;
 
   // Styles
-  TextStyle get listItemTextStyle => TextStyle(
+  TextStyle get textStyleListItem => TextStyle(
         color: getForeGroundColor,
         fontWeight: FontWeight.w500,
       );
 
-  TextStyle get listItemSubTextStyle => TextStyle(
+  TextStyle get textStyleSubListItem => TextStyle(
         color: getForeGroundColor,
         fontSize: 10,
       );
 
-  TextStyle get appBarTitleTextStyle => TextStyle(color: getBackGroundColor);
+  TextStyle get textStyleAppBarTitle => TextStyle(
+        color: getBackGroundColor,
+        fontWeight: FontWeight.w600,
+        fontSize: 20,
+      );
 
-  TextStyle get appBarSubTitleTextStyle => TextStyle(
+  TextStyle get textStyleAppBarSubTitle => TextStyle(
         color: getBackGroundColor,
         fontSize: 12,
       );

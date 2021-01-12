@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' show parse;
 import 'package:bloc/bloc.dart';
 import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,6 +43,21 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
     }
   }
 
+  /// Convert List of IDs [inputIDs] from APIs to proper integer format.
+  List<int> _parseIDs(List<dynamic> inputIDs) {
+    List<int> out = [];
+    inputIDs.forEach(
+      (dynamic id) {
+        if (id is String)
+          out.add(int.parse(id));
+        else if (id is int)
+          out.add(id);
+        else if (id is double) out.add(id.floor());
+      },
+    );
+    return out;
+  }
+
   Future<Post> getPostFromID(int id, {int repeat = 1}) async {
     try {
       if (state is ErrorNewsAPIState) await _initialize();
@@ -53,18 +69,21 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
       else {
         String responseOutput = response.body;
         Map<String, dynamic> outputMap = json.decode(responseOutput);
+
         return Post(
           id: outputMap['id'],
           postedTime:
               DateTime.fromMillisecondsSinceEpoch(outputMap['time'] * 1000),
           url: outputMap['url'],
-          comments: outputMap['kids'],
+          comments: _parseIDs(outputMap['kids']),
           postedBy: outputMap['by'],
           title: outputMap['title'],
         );
       }
-    } catch (_) {
-      if (repeat <= 1) return Future.value(Post.empty);
+    } catch (e) {
+      if (repeat <= 1) {
+        return Future.value(Post.empty);
+      }
       return await getPostFromID(id, repeat: repeat - 1);
     }
   }
@@ -85,16 +104,24 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
           id: outputMap['id'],
           postedTime:
               DateTime.fromMillisecondsSinceEpoch(outputMap['time'] * 1000),
-          children: outputMap['kids'],
+          children: _parseIDs(outputMap['kids']),
           parentID: outputMap['parent'],
           postedBy: outputMap['by'],
-          title: outputMap['text'],
+          // As comment text comes with inline HTML, text must be extracted from them
+          title: parse(outputMap['text']).body.text,
         );
       }
     } catch (_) {
       if (repeat <= 1) return Future.value(Comment.empty);
       return await getCommentFromID(id, repeat: repeat - 1);
     }
+  }
+
+  List<Future<Comment>> getCommentsFromCommentIDList(List<int> commentIDs) {
+    List<Future<Comment>> comments = [];
+    commentIDs
+        .forEach((commentID) => comments.add(getCommentFromID(commentID)));
+    return comments;
   }
 
   Future<List<Future<Post>>> getPosts() async {
@@ -105,7 +132,7 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
         InNewsAPIState _state = state;
 
         http.Response response = await http.get(
-          'https://hacker-news.firebaseio.com/v0/${_state.criteria}stories.json?print=pretty',
+          'https://hacker-news.firebaseio.com/v0/${_state.criteria}stories.json',
         );
         if (response.statusCode != 200)
           throw (HttpException('Response Code ${response.statusCode}'));
@@ -113,9 +140,12 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
           String responseOutput = response.body;
           List<dynamic> postIDList = json.decode(responseOutput);
 
+          // Start Fetching posts from IDs.
           List<Future<Post>> outPosts = [];
+          postIDList.forEach(
+            (postID) => outPosts.add(getPostFromID(postID, repeat: 5)),
+          );
 
-          postIDList.forEach((postID) => outPosts.add(getPostFromID(postID)));
           return outPosts;
         }
       } else

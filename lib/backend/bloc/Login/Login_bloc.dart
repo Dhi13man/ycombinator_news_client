@@ -56,7 +56,7 @@ class LoginBloc extends Cubit<LoginState> {
           'Error while interfacing Google. Check Network Connection.',
         ));
       else
-        emit(ErrorLoginState(e));
+        emit(ErrorLoginState('Sign-in Process was not completed!'));
     }
   }
 

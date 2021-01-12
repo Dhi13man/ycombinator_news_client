@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -103,14 +103,32 @@ class DataBloc extends Cubit<DataState> {
   }
 
   /// When User wants to Open URL, Save to databases and Open
-  void clickPost(Post post) async {
-    bool didOpen;
+  void clickPost(Post post, {BuildContext context}) async {
+    // Only tries opening the Post URL if it is a valid URL.
+    bool isValidUrl(String inputString) {
+      try {
+        return Uri.tryParse(inputString) != null;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    bool didOpen = false;
     try {
-      didOpen = await launch(post.url);
+      if (isValidUrl(post.url)) didOpen = await launch(post.url);
     } catch (_) {
       didOpen = false;
     }
-    if (didOpen) addPost(post);
+    if (didOpen)
+      addPost(post);
+    else if (context != null)
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Center(child: Text('No valid URL')),
+          content: Text('There is no openable URL associated with this post!'),
+        ),
+      );
   }
 
   /// To implement sorted Post List Building.

@@ -1,6 +1,11 @@
 # ycombinator_hacker_news
 
-A Flutter based client application for YCombinator's hacker news API, using Bloc pattern and ChangeNotifier for State Management, and both Local and Cloud Firebase Authenticated Database, as per need.
+A Flutter based client application functioning as a Real-Time News Forum, using:
+
+1. [Bloc pattern](https://bloclibrary.dev) and [ChangeNotifier](https://api.flutter.dev/flutter/foundation/ChangeNotifier-class.html) for State Management.
+2. Both [Local Hive Database](https://pub.dev/packages/hive) and [Cloud Firebase-](https://firebase.google.com/)[Authenticated](https://firebase.google.com/products/auth), [Firestore Database](https://firebase.google.com/products/firestore), as per need.
+
+Acts as a client for [YcCombinator's Hacker News API](https://github.com/HackerNews/API).
 
 ## Getting Started
 

@@ -58,7 +58,8 @@ class Post extends Equatable {
     this.postedBy = '',
     this.title = '',
   })  : comments = comments ?? const [],
-        assert(id != null);
+        assert(id != null),
+        super();
 
   /// Ycombinator Hacker News post ID.
   final int id;
@@ -90,6 +91,9 @@ class Post extends Equatable {
 
   @override
   List<Object> get props => [id];
+
+  @override
+  String toString() => 'Post ID $id, posted at $postedTime';
 }
 
 /// Contains a [post], the number of times it was clicked [clicks], and when it was last clicked [lastClickTime]

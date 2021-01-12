@@ -7,31 +7,6 @@ import 'package:ycombinator_hacker_news/backend/hiveDatabase/shared.dart';
 
 import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key key}) : super(key: key);
-
-  static const routeName = '/';
-  @override
-  Widget build(BuildContext context) {
-    AppConstants _appConstants = context.watch<AppConstants>();
-    Future.wait(
-      [
-        Firebase.initializeApp(),
-        initializeDb(), // For Local Hive Database Working
-      ],
-    ).then(
-      (_) => Navigator.pushReplacementNamed(context, LoginScreen.routeName),
-    );
-
-    return Scaffold(
-      backgroundColor: _appConstants.getBackGroundColor,
-      body: Center(
-        child: AppHeroIcon(appConstants: _appConstants),
-      ),
-    );
-  }
-}
-
 class AppHeroIcon extends StatelessWidget {
   const AppHeroIcon({
     Key key,
@@ -67,16 +42,41 @@ class AppHeroIcon extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(100),
               color: (backgroundColor) ??
-                  _appConstants.getLighterForeGroundColor.withOpacity(0.2),
+                  _appConstants.getLighterForeGroundColor.withOpacity(0.1),
             ),
             child: Icon(
               CupertinoIcons.news,
               size: _size.toDouble(),
               color: (foregroundColor) ??
-                  _appConstants.getLighterForeGroundColor.withOpacity(0.9),
+                  _appConstants.getForeGroundColor.withOpacity(0.9),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({Key key}) : super(key: key);
+
+  static const routeName = '/';
+  @override
+  Widget build(BuildContext context) {
+    AppConstants _appConstants = context.watch<AppConstants>();
+    Future.wait(
+      [
+        Firebase.initializeApp(),
+        initializeDb(), // For Local Hive Database Working
+      ],
+    ).then(
+      (_) => Navigator.pushReplacementNamed(context, LoginScreen.routeName),
+    );
+
+    return Scaffold(
+      backgroundColor: _appConstants.getBackGroundColor,
+      body: Center(
+        child: AppHeroIcon(appConstants: _appConstants),
       ),
     );
   }
