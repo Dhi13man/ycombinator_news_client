@@ -10,6 +10,7 @@ import 'package:ycombinator_hacker_news/backend/constants.dart';
 import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
 import 'package:ycombinator_hacker_news/UI/screens/newsfeed_screen.dart';
 
+/// Contains Sign In, Sign Up, Sign in with Google, Local Sign In and Forgot Password Button.
 class LoginButtons extends StatelessWidget {
   const LoginButtons({
     Key key,
@@ -148,6 +149,7 @@ class LoginButtons extends StatelessWidget {
   }
 }
 
+/// Auto-validated Form allowing user to enter or choose authentication method.
 class LoginForm extends StatefulWidget {
   final AppConstants _appConstants;
   final GlobalKey<FormState> _formKey;
@@ -238,6 +240,9 @@ class _LoginFormState extends State<LoginForm> {
   }
 }
 
+/// Allows to login into Firebase based Account, or Local Database facilitated by Hive.
+///
+/// works with [LoginBloc], facilitating Firebase.
 class LoginScreen extends StatelessWidget {
   final String _title;
 

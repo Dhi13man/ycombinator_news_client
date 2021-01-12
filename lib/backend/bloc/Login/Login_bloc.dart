@@ -18,8 +18,10 @@ class LoginBloc extends Cubit<LoginState> {
         _authenticationRepository = authenticationRepository,
         super(UnLoginState());
 
+  /// Anonymous Login without Firebase account.
   void signInAnonymous() => emit(SignedInLoginState());
 
+  /// Signs in with the provided [email] and [password].
   void signInEmail({
     @required String email,
     @required String password,
@@ -41,6 +43,7 @@ class LoginBloc extends Cubit<LoginState> {
     }
   }
 
+  /// Starts the Sign In with Google Flow.
   void signInGoogle() async {
     try {
       emit(LoadingLoginState());
@@ -60,6 +63,7 @@ class LoginBloc extends Cubit<LoginState> {
     }
   }
 
+  /// Creates a new user with the provided [email] and [password].
   void signUpEmail({
     @required String email,
     @required String password,
@@ -84,11 +88,14 @@ class LoginBloc extends Cubit<LoginState> {
     }
   }
 
+  /// Emits a [SignedOutLoginState], which efficiently signs user out.
   void signOut() async {
     await _authenticationRepository.logOut();
     emit(SignedOutLoginState());
   }
 
+  /// Allows User to Reset password for entered [email],
+  /// using Firebase's Password Recovery Email system.
   void forgotPassword(String email) async {
     try {
       await _authenticationRepository.forgotPassword(email);

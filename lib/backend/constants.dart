@@ -7,7 +7,7 @@ class AppConstants extends ChangeNotifier {
   bool _isThemeLight = false;
 
   AppConstants() {
-    findTheme();
+    _findTheme();
   }
 
   // Getters
@@ -53,7 +53,7 @@ class AppConstants extends ChangeNotifier {
       );
 
   /// Other Functions
-  void findTheme() async {
+  void _findTheme() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _isThemeLight = prefs.getBool('isThemeLight') ?? false;
 

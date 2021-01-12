@@ -16,6 +16,9 @@ import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
 import 'package:ycombinator_hacker_news/UI/app_bars.dart';
 
+/// Widget used in both [NewsFeedScreen] and [ClickedNewsFeedScreen] to show Posts.
+///
+/// Interactable card that opens [ViewPostScreen] when clicked/tapped.
 class NewsFeedListItem extends StatelessWidget {
   const NewsFeedListItem({
     Key key,
@@ -59,14 +62,14 @@ class NewsFeedListItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Hero(
-              //  tag: '${post.id}_${post.postedTime.toIso8601String()}_post',
-              //child:
-              Text(
-                'By: ${post.postedBy}, $numCommentsText' ?? '',
-                style: appConstants.textStyleSubListItem,
+              // Fun little Animation when Post tapped and opened.
+              Hero(
+                tag: '${post.id}_${post.postedTime.toIso8601String()}_post',
+                child: Text(
+                  'By: ${post.postedBy}, $numCommentsText' ?? '',
+                  style: appConstants.textStyleSubListItem,
+                ),
               ),
-              //),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Text(
@@ -108,7 +111,7 @@ class NewsFeedList extends StatelessWidget {
 
           Widget noValidPostsRecievedMessage = Center(
             child: Text(
-              "News feed Empty!\nCheck connection to Hackernews API!",
+              "News feed Empty!\nCheck connection to Hacker News API!",
               textAlign: TextAlign.center,
               style: appConstants.textStyleBodyMessage,
             ),
@@ -261,6 +264,7 @@ class NumberOfOpenedLinks extends StatelessWidget {
   }
 }
 
+/// Shows News Feed from Hacker News API, facilitated by [NewsAPIBloc].
 class NewsFeedScreen extends StatelessWidget {
   static const routeName = '/newsfeed';
   NewsFeedScreen({Key key, String title}) : super(key: key);

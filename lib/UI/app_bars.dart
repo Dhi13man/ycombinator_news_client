@@ -5,6 +5,7 @@ import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/NewsAPI/NewsAPI_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/constants.dart';
 
+/// Common Buttons for both sort and select bar, allowing user to choose criteria of selection.
 class SortButton extends StatelessWidget {
   const SortButton({
     Key key,
@@ -47,8 +48,9 @@ class SortButton extends StatelessWidget {
   }
 }
 
-class FirebaseDataSortBar extends StatelessWidget {
-  const FirebaseDataSortBar({Key key}) : super(key: key);
+/// Allows user tp sort data extracted from Database (Clicked News Stories)
+class DataSortBar extends StatelessWidget {
+  const DataSortBar({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +111,8 @@ class FirebaseDataSortBar extends StatelessWidget {
   }
 }
 
+/// Allows user to choose whether they want 'New', 'Top', or 'Best' stories
+/// from Hacker News API.
 class NewsAPICriteriaSelectBar extends StatelessWidget {
   const NewsAPICriteriaSelectBar({Key key}) : super(key: key);
 
@@ -164,6 +168,7 @@ class NewsAPICriteriaSelectBar extends StatelessWidget {
   }
 }
 
+/// Reloads the current list with same settings.
 class ReloadPostsButton extends StatelessWidget {
   const ReloadPostsButton({
     Key key,

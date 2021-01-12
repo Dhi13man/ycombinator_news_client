@@ -46,7 +46,6 @@ dependencies:
   # BLoC pattern
   bloc:
   flutter_bloc:
-  hydrated_bloc:
   equatable:
 
   # Miscellaneous

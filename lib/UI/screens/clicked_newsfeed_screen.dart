@@ -150,7 +150,7 @@ class ClickedNewsFeedBody extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       child: Column(
         children: [
-          FirebaseDataSortBar(),
+          DataSortBar(),
           Expanded(child: ClickedNewsFeedList()),
         ],
       ),
@@ -158,6 +158,8 @@ class ClickedNewsFeedBody extends StatelessWidget {
   }
 }
 
+/// Shows clicked News Posts, taken from Firestore Database, or Local Hive Database
+/// facilitated by [DataBloc], and retrieving posts by [NewsAPIBloc].
 class ClickedNewsFeedScreen extends StatelessWidget {
   static const routeName = '/clickedfeed';
   ClickedNewsFeedScreen({Key key, String title}) : super(key: key);

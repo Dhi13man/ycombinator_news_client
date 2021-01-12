@@ -7,6 +7,7 @@ import 'package:ycombinator_hacker_news/backend/hiveDatabase/shared.dart';
 
 import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 
+/// Used all over the UI. Can be tapped to toggle theme between Light to Dark.
 class AppHeroIcon extends StatelessWidget {
   const AppHeroIcon({
     Key key,
@@ -57,6 +58,7 @@ class AppHeroIcon extends StatelessWidget {
   }
 }
 
+/// Shown while Firebase and Hive Initializes.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({Key key}) : super(key: key);
 

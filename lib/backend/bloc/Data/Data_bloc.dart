@@ -44,8 +44,12 @@ class DataBloc extends Cubit<DataState> {
     return 'default_doc';
   }
 
+  /// Checks if usage is going on without Firebase.
+  ///
+  /// Used to decide if Hive Database is needed.
   bool get isLocalDatabaseInUse => docToken.compareTo('default_doc') == 0;
 
+  /// Initialize the business logic (and Firebase if authenticated)
   void _initialize() async {
     await _firestore.enableNetwork();
     CollectionReference reservations = FirebaseFirestore.instance.collection(

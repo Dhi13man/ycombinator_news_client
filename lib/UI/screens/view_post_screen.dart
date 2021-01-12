@@ -6,6 +6,8 @@ import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/constants.dart';
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
+/// Clickable Comment Card Widget, capable of displaying or hiding [CommentsList]
+/// for it's children Comments.
 class CommentsListItem extends StatefulWidget {
   final Comment _comment;
   const CommentsListItem({@required Comment comment, Key key})
@@ -26,27 +28,68 @@ class _CommentsListItemState extends State<CommentsListItem> {
     super.initState();
   }
 
+  Widget _childrenInfoTextDecoration({
+    Widget child,
+    Color color = Colors.white,
+  }) {
+    if (child == null) return Container();
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 5),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: color,
+          ),
+        ),
+      ),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    AppConstants appConstants = context.watch<AppConstants>();
-    DataBloc dataBloc = context.watch<DataBloc>();
+    final AppConstants appConstants = context.watch<AppConstants>();
+    final DataBloc dataBloc = context.watch<DataBloc>();
+    final int numChildren = widget._comment.childComments.length;
 
-    // Build widget below based on whether Children comments are to be visible or not.
+    // Modified Text Style Just for the cards here
+    final TextStyle textStyleListItemModified =
+        appConstants.textStyleListItem.copyWith(
+      color: appConstants.getBackGroundColor,
+    );
+
+    // Build widgets below based on whether Children comments are to be visible or not.
     Widget childWidget = Container();
-    if (widget._comment.childComments.length > 0 && _areChildrenVisible)
+    Widget hasChildrenText = Container();
+    if (numChildren > 0 && _areChildrenVisible) {
+      hasChildrenText = _childrenInfoTextDecoration(
+        child: Text(
+          "Tap to Collapse Children.",
+          style: textStyleListItemModified,
+        ),
+        color: appConstants.getBackGroundColor,
+      );
       childWidget = Container(
-        height: 300,
-        padding: EdgeInsets.only(left: 20, bottom: 10),
+        height: ((numChildren <= 4) ? numChildren : 4) * 100.0,
+        padding: EdgeInsets.only(left: 20, bottom: 10, top: 5),
         child: CommentsList(
           commentIDList: widget._comment.childComments,
           appConstants: appConstants,
         ),
       );
+    } else if (numChildren > 0)
+      hasChildrenText = _childrenInfoTextDecoration(
+        child: Text(
+          "Tap to View $numChildren Children.",
+          style: textStyleListItemModified,
+        ),
+        color: appConstants.getBackGroundColor,
+      );
 
     return Column(
       children: [
         RawMaterialButton(
-          onPressed: (widget._comment.childComments.length > 0)
+          onPressed: (numChildren > 0)
               ? () => setState(() => _areChildrenVisible = !_areChildrenVisible)
               : null,
           child: Card(
@@ -68,17 +111,13 @@ class _CommentsListItemState extends State<CommentsListItem> {
                       children: [
                         Text(
                           'By: ${widget._comment.postedBy}, ',
-                          style: appConstants.textStyleListItem.copyWith(
-                            color: appConstants.getBackGroundColor,
-                          ),
+                          style: textStyleListItemModified,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Text(
                             'Posted: ${dataBloc.formatDateTime(widget._comment.postedTime)}',
-                            style: appConstants.textStyleListItem.copyWith(
-                              color: appConstants.getBackGroundColor,
-                            ),
+                            style: textStyleListItemModified,
                           ),
                         ),
                       ],
@@ -94,6 +133,7 @@ class _CommentsListItemState extends State<CommentsListItem> {
                       ),
                     ),
                   ),
+                  hasChildrenText,
                 ],
               ),
             ),
@@ -105,6 +145,10 @@ class _CommentsListItemState extends State<CommentsListItem> {
   }
 }
 
+/// List of Comments rendered from [List<int>] [commentIDList]
+/// which [NewsAPIBloc] fetches from API.
+///
+/// Recursively called for each Child comment List as needed.
 class CommentsList extends StatelessWidget {
   final List<int> _commentIDList;
   final AppConstants _appConstants;
@@ -150,6 +194,7 @@ class CommentsList extends StatelessWidget {
   }
 }
 
+/// Interactable, animated card showing [Post] in UI. Acts as app bar.
 class ExpandedPostView extends StatefulWidget {
   const ExpandedPostView({
     Key key,
@@ -194,7 +239,6 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
           dataBloc.clickPost(widget.viewedPost);
         setState(() => _dynamicPadding = _basePadding);
       },
-      onTap: () => dataBloc.clickPost(widget.viewedPost),
       child: AnimatedContainer(
         duration: Duration(milliseconds: 250),
         curve: Curves.easeOut,
@@ -209,34 +253,42 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
               : widget.appConstants.getForeGroundColor[900],
         ),
         child: SafeArea(
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(Icons.arrow_back),
-                    color: widget.appConstants.getBackGroundColor,
-                    iconSize: (_dynamicPadding != _maxPadding) ? 28 : 24,
+          child: GestureDetector(
+            onTap: () => dataBloc.clickPost(widget.viewedPost),
+            child: Column(
+              children: [
+                // To complete Transitions from NewsFeedScreen and ClickedNewsFeedScreen
+                Hero(
+                  tag:
+                      '${widget.viewedPost.id}_${widget.viewedPost.postedTime.toIso8601String()}_post',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(Icons.arrow_back),
+                        color: widget.appConstants.getBackGroundColor,
+                        iconSize: (_dynamicPadding != _maxPadding) ? 28 : 24,
+                      ),
+                      Text(
+                        'By: ${widget.viewedPost.postedBy}',
+                        style: widget.appConstants.textStyleAppBarTitle,
+                      )
+                    ],
                   ),
-                  Text(
-                    'By: ${widget.viewedPost.postedBy}',
-                    style: widget.appConstants.textStyleAppBarTitle,
-                  )
-                ],
-              ),
-              Container(
-                padding: EdgeInsets.only(left: 50, right: 15, bottom: 10),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${widget.viewedPost.title}',
-                  style: widget.appConstants.textStyleAppBarSubTitle
-                      .copyWith(fontSize: 18),
-                  textAlign: TextAlign.left,
                 ),
-              ),
-            ],
+                Container(
+                  padding: EdgeInsets.only(left: 50, right: 15, bottom: 10),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${widget.viewedPost.title}',
+                    style: widget.appConstants.textStyleAppBarSubTitle
+                        .copyWith(fontSize: 18),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -244,6 +296,7 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
   }
 }
 
+/// Shows the Post [post] in an expanded way, followed by its comments.
 class ViewPostScreen extends StatelessWidget {
   final Post _post;
   static const String routeName = '/postScreen';

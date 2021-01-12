@@ -43,6 +43,7 @@ class AuthenticationRepository {
     });
   }
 
+  /// Anonymous Login without Firebase account, which uses Hive Database for local storage.
   Future<firebase_auth.UserCredential> logInAnonymous({
     bool persists = true,
   }) async {
@@ -148,6 +149,8 @@ class AuthenticationRepository {
     }
   }
 
+  /// Allows User to Reset password for entered [email],
+  /// using Firebase's Password Recovery Email system.
   Future<void> forgotPassword(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);

@@ -17,6 +17,9 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
     _initialize();
   }
 
+  /// Checks if internet connection is working every time API reinitializes.
+  ///
+  /// API won't waste time trying anything if internet is not working.
   Future<bool> _canConnect() async {
     try {
       return DataConnectionChecker().hasConnection;
@@ -58,6 +61,9 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
     return out;
   }
 
+  /// Fetch Post having post ID [id] from News API. Returns a [Future<Post>].
+  ///
+  /// [repeat] is used to specify how many times the app will try to fetch data before giving up.
   Future<Post> getPostFromID(int id, {int repeat = 1}) async {
     try {
       if (state is ErrorNewsAPIState) await _initialize();
@@ -80,14 +86,15 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
           title: outputMap['title'],
         );
       }
-    } catch (e) {
-      if (repeat <= 1) {
-        return Future.value(Post.empty);
-      }
+    } catch (_) {
+      if (repeat <= 1) return Future.value(Post.empty);
       return await getPostFromID(id, repeat: repeat - 1);
     }
   }
 
+  /// Fetch Comment having comment ID [id] from News API. Returns a [Future<Comment>].
+  ///
+  /// [repeat] is used to specify how many times the app will try to fetch data before giving up.
   Future<Comment> getCommentFromID(int id, {int repeat = 1}) async {
     try {
       if (state is ErrorNewsAPIState) await _initialize();
@@ -117,13 +124,24 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
     }
   }
 
+  /// Get Comments from a list of comment IDs [commentIDs]. Returns a [List<Future<Comment>>].
+  ///
+  /// Each item is a [Future<Comment>] that will load as needed.
+  /// More Efficient than waiting for all comments to load at once.
   List<Future<Comment>> getCommentsFromCommentIDList(List<int> commentIDs) {
     List<Future<Comment>> comments = [];
-    commentIDs
-        .forEach((commentID) => comments.add(getCommentFromID(commentID)));
+    commentIDs.forEach(
+      (commentID) => comments.add(
+        getCommentFromID(commentID, repeat: 3),
+      ),
+    );
     return comments;
   }
 
+  /// Get posts from Database. Returns a [Future<List<Future<Post>>>].
+  ///
+  /// Each item is a [Future<Post>] that will load as needed.
+  /// More Efficient than waiting for all posts to load at once.
   Future<List<Future<Post>>> getPosts() async {
     try {
       if (state is ErrorNewsAPIState) await _initialize();
@@ -143,7 +161,7 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
           // Start Fetching posts from IDs.
           List<Future<Post>> outPosts = [];
           postIDList.forEach(
-            (postID) => outPosts.add(getPostFromID(postID, repeat: 5)),
+            (postID) => outPosts.add(getPostFromID(postID, repeat: 3)),
           );
 
           return outPosts;

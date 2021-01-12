@@ -3,7 +3,9 @@ import 'package:hive/hive.dart';
 
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
+/// Utility class having Static Functions for facilitating Hive Database.
 class PostDataHiveDatabaseHandler {
+  /// Write [postData] to Database.
   static Future<void> writeToDB({
     @required int postID,
     @required PostData postData,
@@ -23,8 +25,9 @@ class PostDataHiveDatabaseHandler {
     if (box.isOpen) box.close();
   }
 
+  /// Delete [postData] from Database.
   static Future<void> deletePostData({@required int postID}) async {
-    // Make sure valid Data
+    // Make sure it is valid Data
     assert(postID != null);
 
     Box<StoreablePostData> box =
@@ -33,6 +36,7 @@ class PostDataHiveDatabaseHandler {
     if (box.isOpen) box.close();
   }
 
+  /// Remove all [PostData] items from Database.
   static Future<int> clearBox() async {
     Box<StoreablePostData> box =
         await Hive.openBox<StoreablePostData>('clickedPosts');
@@ -41,6 +45,7 @@ class PostDataHiveDatabaseHandler {
     return out;
   }
 
+  /// Stream all [postData] in real time from Database.
   static Stream<List<StoreablePostData>> watchPostDataFromBox() async* {
     Box<StoreablePostData> box =
         await Hive.openBox<StoreablePostData>('clickedPosts');
@@ -50,6 +55,7 @@ class PostDataHiveDatabaseHandler {
     });
   }
 
+  /// Get all [postData] from Database.
   static Future<Map<dynamic, StoreablePostData>> getPostDataFromBox() async {
     Box<StoreablePostData> box =
         await Hive.openBox<StoreablePostData>('clickedPosts');

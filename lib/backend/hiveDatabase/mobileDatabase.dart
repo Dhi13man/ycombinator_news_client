@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart' as paths;
 
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
+/// Initialize Hive Database for Mobile Operating Systems.
 Future<void> initializeDb() async {
   if (Platform.isIOS || Platform.isAndroid) {
     final documentDirectory = await paths.getApplicationDocumentsDirectory();

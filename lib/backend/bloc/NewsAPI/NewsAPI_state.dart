@@ -26,7 +26,7 @@ class LoadingNewsAPIState extends NewsAPIState {
   String toString() => 'Loading News State';
 }
 
-/// News API Initialized and Loaded
+/// News API Initialized and Loaded State
 /// Can either be asking to fetch Top, New or Best News Posts
 class InNewsAPIState extends NewsAPIState {
   final String selectedCriteriaButtonText;
@@ -52,6 +52,7 @@ class InNewsAPIState extends NewsAPIState {
   String toString() => 'News API working State';
 }
 
+/// State notifying that there was an Error while retrieving data from News API.
 class ErrorNewsAPIState extends NewsAPIState {
   final String errorMessage;
 
