@@ -8,7 +8,7 @@ A Flutter based client application functioning as a Real-Time News Forum, using:
 
 Acts as a client for [YcCombinator's Hacker News API](https://github.com/HackerNews/API).
 
-Download the Android App [`.apk` directly](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Output/HackerNews.apk), or compressed version from [Releases Page](https://github.com/Dhi13man/reservation_manager_firebase/releases/tag/0.5.0-android).
+Download the Android App [`.apk` directly](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Output/HackerNews.apk), or compressed version from [Releases Page](https://github.com/Dhi13man/ycombinator_news_client/releases/tag/0.5.0-android).
 
 ## Features
 
@@ -22,23 +22,23 @@ Download the Android App [`.apk` directly](https://raw.githubusercontent.com/Dhi
 
 Authentication Screen(Light): | Authentication Screen(Dark):
 ----------------|----------------------------
-[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/LoginScreen_Light.jpg" alt="Authentication Screen(Light)">](https://raw.githubusercontent.com/Dhi13man/SafeSyncIoT/main/Screenshots/LoginScreen_Light.jpg) | [<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/LoginScreen_Dark.jpg" alt="Authentication Screen(Dark)">](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/LoginScreen_Dark.jpg)
+[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/LoginScreen_Light.jpg" alt="Authentication Screen(Light)">](https://raw.githubusercontent.com/Dhi13man/SafeSyncIoT/main/Screenshots/LoginScreen_Light.jpg) | [<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/LoginScreen_Dark.jpg" alt="Authentication Screen(Dark)">](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/LoginScreen_Dark.jpg)
 
 News Feed Screen(Light): | News Feed Screen(Dark):
 --------------------------------------|----------------------
-[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/NewsFeed_Light.jpg" alt="News Feed Screen(Light)">](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/NewsFeed_Light.jpg) | [<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/NewsFeed_Dark.jpg" alt="News Feed Screen(Dark)">](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/NewsFeed_Dark.jpg)
+[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/NewsFeed_Light.jpg" alt="News Feed Screen(Light)">](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/NewsFeed_Light.jpg) | [<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/NewsFeed_Dark.jpg" alt="News Feed Screen(Dark)">](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/NewsFeed_Dark.jpg)
 
 View Post Screen(Light): | View Post Screen(Dark):
 --------------------------------------|----------------------
-[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/ViewPost_Light.jpg" alt="View Post Screen(Light)">](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/ViewPost_Light.jpg) | [<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/ViewPost_Dark.jpg" alt="View Post Screen(Dark)">](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/ViewPost_Dark.jpg)
+[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/ViewPost_Light.jpg" alt="View Post Screen(Light)">](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/ViewPost_Light.jpg) | [<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/ViewPost_Dark.jpg" alt="View Post Screen(Dark)">](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/ViewPost_Dark.jpg)
 
 Clicked Posts List Screen(Light): | Clicked Posts List Screen(Dark):
 --------------------------------------|----------------------
-[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/ClickedPosts_Light.jpg" alt="Clicked Posts List Screen(Light)">](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/ClickedPosts_Light.jpg) | [<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/ClickedPosts_Dark.jpg" alt="Clicked Posts List Screen(Dark)">](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/ClickedPosts_Dark.jpg)
+[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/ClickedPosts_Light.jpg" alt="Clicked Posts List Screen(Light)">](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/ClickedPosts_Light.jpg) | [<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/ClickedPosts_Dark.jpg" alt="Clicked Posts List Screen(Dark)">](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/ClickedPosts_Dark.jpg)
 
 Animated Post URL opening Example:|
 ------------------------------|
-[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/PostClickDemo.mp4" alt="Animated Post URL opening Example">](https://raw.githubusercontent.com/Dhi13man/reservation_manager_firebase/main/Screenshots/PostClickDemo.mp4) |
+[<img height="600" width="350" src="https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/PostClickDemo.mp4" alt="Animated Post URL opening Example">](https://raw.githubusercontent.com/Dhi13man/ycombinator_news_client/main/Screenshots/PostClickDemo.mp4) |
 
 ---
 
