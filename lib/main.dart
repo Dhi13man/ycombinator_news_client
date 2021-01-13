@@ -18,23 +18,23 @@ import 'package:ycombinator_hacker_news/UI/screens/view_post_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDb();
-  AppConstants _appConstants = AppConstants();
-  runApp(
-    ChangeNotifierProvider<AppConstants>.value(
-      value: _appConstants,
-      builder: (context, child) => ReservationApp(),
-    ),
-  );
+
+  // Run app only after mandatory dependencies initialized.
+  runApp(MainApp());
 }
 
-class ReservationApp extends StatelessWidget {
+class MainApp extends StatelessWidget {
   final String _appTitle = 'Hacker News';
 
   // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
+      // Spreading the Business Logic and States throughout the widget tree.
       providers: [
+        ChangeNotifierProvider<AppConstants>(
+          create: (context) => AppConstants(),
+        ),
         BlocProvider<LoginBloc>(
           create: (context) => LoginBloc(
             authenticationRepository: AuthenticationRepository(),
@@ -51,11 +51,15 @@ class ReservationApp extends StatelessWidget {
           ),
         ),
       ],
+
+      /// Material App that wraps every UI component of this project.
       child: MaterialApp(
         title: _appTitle,
         theme: ThemeData(primarySwatch: Colors.blue),
         debugShowCheckedModeBanner: false,
         onGenerateRoute: (settings) {
+          // Setting up App routes and Transitions.
+          // Builders are provided so state can be extracted from context and re-spread through the branches.
           switch (settings.name) {
             case SplashScreen.routeName:
               return PageTransition(
