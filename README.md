@@ -38,7 +38,7 @@ Clicked Posts List Screen(Light): | Clicked Posts List Screen(Dark):
 
 Animated Post URL opening Example:|
 ------------------------------|
-[<img height="600" width="350" src="https://github.com/Dhi13man/ycombinator_news_client/blob/main/Screenshots/PostClickDemo.mp4?raw=true" alt="Animated Post URL opening Example">](https://github.com/Dhi13man/ycombinator_news_client/blob/main/Screenshots/PostClickDemo.mp4?raw=true) |
+[<img height="600" width="350" src="https://github.com/Dhi13man/ycombinator_news_client/blob/main/Screenshots/PostClickDemo.gif?raw=true" alt="Animated Post URL opening Example">](https://github.com/Dhi13man/ycombinator_news_client/blob/main/Screenshots/PostClickDemo.gif?raw=true) |
 
 ---
 
