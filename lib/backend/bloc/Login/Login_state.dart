@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
 
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart'
     as data;
@@ -43,7 +44,12 @@ class SignedInLoginState extends LoginState {
   final data.User user;
   final UserCredential credential;
 
-  SignedInLoginState({this.user, this.credential}) : super([credential]);
+  SignedInLoginState({this.user, this.credential}) : super([credential]) {
+    if (user == null) _openBoxIfLocalUse();
+  }
+
+  void _openBoxIfLocalUse() async =>
+      await Hive.openBox<data.StoreablePostData>('clickedPosts');
 
   @override
   String toString() {
@@ -60,8 +66,17 @@ class SignedInLoginState extends LoginState {
 class ErrorLoginState extends LoginState {
   final String errorMessage;
 
-  ErrorLoginState(this.errorMessage) : super([errorMessage]);
+  ErrorLoginState(this.errorMessage) : super([errorMessage]) {
+    _closeBoxIfLocalUseEnded();
+  }
 
   @override
   String toString() => 'ErrorLoginState';
+
+  void _closeBoxIfLocalUseEnded() async {
+    Box<data.StoreablePostData> box =
+        Hive.box<data.StoreablePostData>('clickedPosts');
+
+    if (box.isOpen) box.close();
+  }
 }

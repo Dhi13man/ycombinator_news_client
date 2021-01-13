@@ -213,6 +213,9 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
   final double _basePadding = 30, _maxPadding = 60;
   double _dynamicPadding;
 
+  bool _postHasValidUrl(DataBloc bloc) =>
+      bloc.isValidUrl(widget.viewedPost.url);
+
   @override
   void initState() {
     _dynamicPadding = _basePadding;
@@ -223,24 +226,28 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
   Widget build(BuildContext context) {
     DataBloc dataBloc = context.watch<DataBloc>();
     return GestureDetector(
-      onVerticalDragUpdate: (details) => setState(
-        () {
-          if (_dynamicPadding == _basePadding && details.delta.dy < 0)
-            return;
-          else if (_dynamicPadding >= _maxPadding) {
-            _dynamicPadding = _maxPadding;
-            return;
-          } else
-            _dynamicPadding = _basePadding + 2.5 * details.delta.dy;
-        },
-      ),
-      onVerticalDragEnd: (details) {
-        if (_dynamicPadding == _maxPadding)
-          dataBloc.clickPost(widget.viewedPost);
-        setState(() => _dynamicPadding = _basePadding);
-      },
+      onVerticalDragUpdate: (_postHasValidUrl(dataBloc))
+          ? (details) => setState(
+                () {
+                  if (_dynamicPadding == _basePadding && details.delta.dy < 0)
+                    return;
+                  else if (_dynamicPadding >= _maxPadding) {
+                    _dynamicPadding = _maxPadding;
+                    return;
+                  } else
+                    _dynamicPadding = _basePadding + 3 * details.delta.dy;
+                },
+              )
+          : null,
+      onVerticalDragEnd: (_postHasValidUrl(dataBloc))
+          ? (details) {
+              if (_dynamicPadding == _maxPadding)
+                dataBloc.clickPost(widget.viewedPost);
+              setState(() => _dynamicPadding = _basePadding);
+            }
+          : null,
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 250),
+        duration: Duration(milliseconds: 200),
         curve: Curves.easeOut,
         padding: EdgeInsets.only(bottom: _dynamicPadding, top: _dynamicPadding),
         decoration: BoxDecoration(
@@ -254,7 +261,9 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
         ),
         child: SafeArea(
           child: GestureDetector(
-            onTap: () => dataBloc.clickPost(widget.viewedPost),
+            onTap: (_postHasValidUrl(dataBloc))
+                ? () => dataBloc.clickPost(widget.viewedPost)
+                : null,
             child: Column(
               children: [
                 // To complete Transitions from NewsFeedScreen and ClickedNewsFeedScreen
@@ -274,7 +283,7 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
                   ],
                 ),
                 Container(
-                  padding: EdgeInsets.only(left: 50, right: 15, bottom: 10),
+                  padding: EdgeInsets.only(left: 50, right: 15, bottom: 15),
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '${widget.viewedPost.title}',
@@ -282,6 +291,25 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
                       color: widget.appConstants.getBackGroundColor,
                       fontSize: 18,
                     ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 50, right: 15),
+                  padding: EdgeInsets.only(top: 5, bottom: 5),
+                  alignment: Alignment.centerLeft,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                          color: widget.appConstants.getBackGroundColor),
+                    ),
+                  ),
+                  child: Text(
+                    (_postHasValidUrl(dataBloc))
+                        ? 'Full Story Link: ${widget.viewedPost.url}'
+                        : 'No URL!',
+                    style: widget.appConstants.textStyleAppBarTitle
+                        .copyWith(fontSize: 10),
                     textAlign: TextAlign.left,
                   ),
                 ),

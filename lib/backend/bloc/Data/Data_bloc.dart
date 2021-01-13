@@ -107,17 +107,19 @@ class DataBloc extends Cubit<DataState> {
     }
   }
 
+  /// Checks if given [inputString] is a valid openable URL.
+  ///
+  /// Only tries opening the Post URL if it is a valid URL.
+  bool isValidUrl(String inputString) {
+    try {
+      return Uri.tryParse(inputString) != null;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// When User wants to Open URL, Save to databases and Open
   void clickPost(Post post, {BuildContext context}) async {
-    // Only tries opening the Post URL if it is a valid URL.
-    bool isValidUrl(String inputString) {
-      try {
-        return Uri.tryParse(inputString) != null;
-      } catch (_) {
-        return false;
-      }
-    }
-
     bool didOpen = false;
     try {
       if (isValidUrl(post.url)) didOpen = await launch(post.url);
@@ -256,7 +258,7 @@ class DataBloc extends Cubit<DataState> {
   void rebuildClickedPostsStream({String filter, bool isAscending}) {
     if (state is InDataState) {
       InDataState _state = state;
-      Future.delayed(Duration(milliseconds: 30))
+      Future.delayed(Duration(milliseconds: 60))
           .then((_) => emit(UnDataState()));
       emit(
         InDataState(

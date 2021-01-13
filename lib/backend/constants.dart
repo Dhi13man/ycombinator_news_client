@@ -4,7 +4,7 @@ import 'package:hive/hive.dart';
 export 'package:provider/provider.dart';
 
 class AppConstants extends ChangeNotifier {
-  bool _isThemeLight = false;
+  bool _isThemeLight = true;
 
   AppConstants() {
     _findTheme();
@@ -56,7 +56,7 @@ class AppConstants extends ChangeNotifier {
   void _findTheme() async {
     if (!Hive.isBoxOpen('settingsBox')) await Hive.openBox('settingsBox');
     Box box = Hive.box('settingsBox');
-    _isThemeLight = box.get('isThemeLight') ?? false;
+    _isThemeLight = box.get('isThemeLight') ?? true;
     await box.put('isThemeLight', _isThemeLight);
 
     notifyListeners();

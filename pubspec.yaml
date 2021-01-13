@@ -42,6 +42,7 @@ dependencies:
   hive:
   hive_flutter:
   sqflite:
+  path_provider: 
 
   # BLoC pattern
   bloc:
@@ -49,7 +50,6 @@ dependencies:
   equatable:
 
   # Miscellaneous
-  path_provider: 
   data_connection_checker:
   url_launcher:
   html:

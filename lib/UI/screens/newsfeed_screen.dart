@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_bloc.dart';
@@ -243,7 +242,7 @@ class NumberOfOpenedLinks extends StatelessWidget {
             stream: dataBloc.documentStream(),
             initialData: futureSnapshot.data,
             builder: (context, snapshot) {
-              if (!snapshot.hasData)
+              if (dataBloc.state is UnDataState || !snapshot.hasData)
                 return Text(
                   '...checking Links Opened',
                   style: appConstants.textStyleAppBarSubTitle,
@@ -252,11 +251,13 @@ class NumberOfOpenedLinks extends StatelessWidget {
               /// Is a [DocumentSnapshot] when firebase is being used,
               /// and direct [List<PostData>] when Local Hive Database
               dynamic docSnap = snapshot.data;
-              List<dynamic> postDataList = [];
-              if (docSnap is List)
-                postDataList = docSnap;
-              else if (docSnap is DocumentSnapshot)
-                postDataList = dataBloc.extractDataFromFirebase(docSnap.data());
+
+              // Convert to common format.
+              List<dynamic> postDataList =
+                  dataBloc.extractPostDataFromStoreablePostData(
+                unprocessedData: docSnap,
+              );
+
               return Text(
                 '${postDataList.length} Links clicked so far!',
                 style: appConstants.textStyleAppBarSubTitle,
