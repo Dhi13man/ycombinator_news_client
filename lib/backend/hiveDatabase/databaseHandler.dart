@@ -41,7 +41,7 @@ class PostDataHiveDatabaseHandler {
     Box<StoreablePostData> box =
         await Hive.openBox<StoreablePostData>('clickedPosts');
     int out = await box.clear();
-    box.close();
+    if (box.isOpen) box.close();
     return out;
   }
 

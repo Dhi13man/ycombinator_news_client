@@ -29,13 +29,13 @@ dependencies:
   simple_animations:
   flutter_spinkit:
   page_transition:
-  flutter_form_builder:
+  flutter_form_builder: 
   flutter_signin_button:
 
   # FlutterFire
   firebase_core:
   cloud_firestore:
-  firebase_auth:
+  firebase_auth: ^0.19.0+1
   google_sign_in:
 
   # Hive Local Database
@@ -49,8 +49,8 @@ dependencies:
   equatable:
 
   # Miscellaneous
+  path_provider: 
   data_connection_checker:
-  shared_preferences:
   url_launcher:
   html:
 

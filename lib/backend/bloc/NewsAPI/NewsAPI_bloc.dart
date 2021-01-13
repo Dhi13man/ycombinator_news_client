@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:bloc/bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:data_connection_checker/data_connection_checker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/NewsAPI/NewsAPI_state.dart';
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
@@ -36,8 +36,9 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
       emit(ErrorNewsAPIState('No Internet!'));
     else {
       /// Check if user has preferred saved News Type Preferences (Top default)
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String _getSavedCritieria = prefs.getString('newsType');
+      Box box = Hive.box('settingsBox');
+      String _getSavedCritieria = box.get('newsType');
+
       emit(
         InNewsAPIState(
           criteria: _getSavedCritieria ?? InNewsAPIState.viewByTop,

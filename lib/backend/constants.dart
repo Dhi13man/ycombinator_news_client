@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 
 export 'package:provider/provider.dart';
 
@@ -54,10 +54,11 @@ class AppConstants extends ChangeNotifier {
 
   /// Other Functions
   void _findTheme() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _isThemeLight = prefs.getBool('isThemeLight') ?? false;
+    if (!Hive.isBoxOpen('settingsBox')) await Hive.openBox('settingsBox');
+    Box box = Hive.box('settingsBox');
+    _isThemeLight = box.get('isThemeLight') ?? false;
+    await box.put('isThemeLight', _isThemeLight);
 
-    await prefs.setBool('isThemeLight', _isThemeLight);
     notifyListeners();
   }
 
@@ -65,7 +66,8 @@ class AppConstants extends ChangeNotifier {
     _isThemeLight = !_isThemeLight;
     notifyListeners();
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isThemeLight', _isThemeLight);
+    if (!Hive.isBoxOpen('settingsBox')) await Hive.openBox('settingsBox');
+    Box box = Hive.box('settingsBox');
+    await box.put('isThemeLight', _isThemeLight);
   }
 }

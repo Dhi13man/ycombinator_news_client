@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_state.dart';
@@ -57,9 +57,10 @@ class DataBloc extends Cubit<DataState> {
     );
 
     // Check if user has preffered saved Sorting Preferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String savedCriteria = prefs.getString('criteria');
-    bool savedOrder = prefs.getBool('isAscending');
+    Box box = Hive.box('settingsBox');
+
+    String savedCriteria = box.get('criteria');
+    bool savedOrder = box.get('isAscending');
 
     emit(InDataState(
       collection: reservations,

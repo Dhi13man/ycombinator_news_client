@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hive/hive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class DataState extends Equatable {
   final List propss;
@@ -35,9 +35,9 @@ class InDataState extends DataState {
   }
 
   void _saveSortingPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('criteria', selectedCriteriaButtonText);
-    await prefs.setBool('isAscending', isAscending);
+    Box box = Hive.box('settingsBox');
+    await box.put('criteria', selectedCriteriaButtonText);
+    await box.put('isAscending', isAscending);
   }
 
   /// Default filter is ['time']

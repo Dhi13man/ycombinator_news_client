@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 
 abstract class NewsAPIState extends Equatable {
   final List propss;
@@ -41,8 +41,8 @@ class InNewsAPIState extends NewsAPIState {
   }
 
   void _saveSortingPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('newsType', selectedCriteriaButtonText);
+    Box box = Hive.box('settingsBox');
+    await box.put('newsType', selectedCriteriaButtonText);
   }
 
   /// Criteria of Posts to be fetched from ['new', 'top', 'best']

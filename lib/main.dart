@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:page_transition/page_transition.dart';
 
+import 'package:ycombinator_hacker_news/backend/hiveDatabase/shared.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Data/Data_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_bloc.dart';
 import 'package:ycombinator_hacker_news/backend/bloc/NewsAPI/NewsAPI_bloc.dart';
@@ -16,6 +17,7 @@ import 'package:ycombinator_hacker_news/UI/screens/view_post_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDb();
   AppConstants _appConstants = AppConstants();
   runApp(
     ChangeNotifierProvider<AppConstants>.value(
