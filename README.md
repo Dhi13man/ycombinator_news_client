@@ -1,7 +1,8 @@
 # ycombinator_hacker_news
 
-A Flutter based client application functioning as a Real-Time News Forum, using:
+[![Codemagic build status](https://api.codemagic.io/apps/60047b471b08f3ea8e53914c/60047b471b08f3ea8e53914b/status_badge.svg)](https://codemagic.io/apps/60047b471b08f3ea8e53914c/60047b471b08f3ea8e53914b/latest_build)
 
+A Flutter based client application functioning as a Real-Time News Forum, using:
 1. [Bloc pattern](https://bloclibrary.dev) architecture and [ChangeNotifier](https://api.flutter.dev/flutter/foundation/ChangeNotifier-class.html) for State Management.
 2. Both [Local Hive Database](https://pub.dev/packages/hive) and [Cloud Firebase-](https://firebase.google.com/)[Authenticated](https://firebase.google.com/products/auth), [Firestore Database](https://firebase.google.com/products/firestore), as per need.
 3. Utilizes [Material Design](https://material.io/develop/flutter) elements for UI building, as well as various other Open Source Packages as [listed below](#dependencies-used).
