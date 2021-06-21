@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
@@ -20,13 +22,15 @@ class DataBloc extends Cubit<DataState> {
   final String _collectionName = 'posts';
 
   DataBloc({
-    FirebaseFirestore firestore,
-    DataState initialState,
-    @required NewsAPIBloc newsAPIBloc,
-    @required LoginBloc loginBloc,
-  })  : _firestore = firestore ?? (kIsWeb)
-            ? FirebaseFirestore.instance.enablePersistence()
-            : FirebaseFirestore.instance,
+    FirebaseFirestore? firestore,
+    DataState? initialState,
+    required NewsAPIBloc newsAPIBloc,
+    required LoginBloc loginBloc,
+  })  : _firestore = firestore ??
+            ((kIsWeb)
+                ? FirebaseFirestore.instance.enablePersistence()
+                    as FirebaseFirestore
+                : FirebaseFirestore.instance),
         _loginBloc = loginBloc,
         _newsAPIBloc = newsAPIBloc,
         super(initialState ?? UnDataState()) {
@@ -37,9 +41,9 @@ class DataBloc extends Cubit<DataState> {
   /// Token to give each user different session
   String get docToken {
     if (_loginBloc.state is SignedInLoginState) {
-      SignedInLoginState _loginState = _loginBloc.state;
+      SignedInLoginState _loginState = _loginBloc.state as SignedInLoginState;
       if (_loginState.credential != null)
-        return _loginState.credential.user?.uid.toString();
+        return _loginState.credential!.user?.uid.toString() ?? 'default_doc';
     }
     return 'default_doc';
   }
@@ -59,8 +63,8 @@ class DataBloc extends Cubit<DataState> {
     // Check if user has preffered saved Sorting Preferences
     Box box = Hive.box('settingsBox');
 
-    String savedCriteria = box.get('criteria');
-    bool savedOrder = box.get('isAscending');
+    String? savedCriteria = box.get('criteria');
+    bool? savedOrder = box.get('isAscending');
 
     emit(InDataState(
       collection: reservations,
@@ -79,7 +83,7 @@ class DataBloc extends Cubit<DataState> {
       if (isLocalDatabaseInUse)
         return PostDataHiveDatabaseHandler.watchPostDataFromBox();
 
-      InDataState _state = state;
+      InDataState _state = state as InDataState;
       return _state.collection.doc('${docToken}_doc').snapshots();
     } else {
       _initialize();
@@ -99,7 +103,7 @@ class DataBloc extends Cubit<DataState> {
             await PostDataHiveDatabaseHandler.getPostDataFromBox();
         return map.values.toList();
       }
-      InDataState _state = state;
+      InDataState _state = state as InDataState;
       return await _state.collection.doc('${docToken}_doc').get();
     } else {
       _initialize();
@@ -119,10 +123,10 @@ class DataBloc extends Cubit<DataState> {
   }
 
   /// When User wants to Open URL, Save to databases and Open
-  void clickPost(Post post, {BuildContext context}) async {
+  void clickPost(Post post, {BuildContext? context}) async {
     bool didOpen = false;
     try {
-      if (isValidUrl(post.url)) didOpen = await launch(post.url);
+      if (isValidUrl(post.url!)) didOpen = await launch(post.url!);
     } catch (_) {
       didOpen = false;
     }
@@ -139,7 +143,7 @@ class DataBloc extends Cubit<DataState> {
   }
 
   /// Returns how many time [Post] of id [postID] has been clicked so far
-  Future<int> _timesPostClickedEarlier(int postID) async {
+  Future<int?> _timesPostClickedEarlier(int postID) async {
     String postKey = postID.toString();
 
     // Handle Firebase-less local application
@@ -147,20 +151,21 @@ class DataBloc extends Cubit<DataState> {
       Map<dynamic, StoreablePostData> box =
           await PostDataHiveDatabaseHandler.getPostDataFromBox();
 
-      Map<int, PostData> postDataList = {};
+      Map<int?, PostData> postDataList = {};
       box.forEach(
         (dynamic postID, StoreablePostData element) =>
             postDataList[postID] = _storeablePostDataToPostData(element),
       );
 
       if (!postDataList.containsKey(postID)) return 0;
-      return postDataList[postID].clicks;
+      return postDataList[postID]!.clicks;
     }
 
     // Will break if somehow this code executes in Local Database mode,
     // shouldn't happen in normal conditions.
-    DocumentSnapshot snap = await documentCheck();
-    Map<String, dynamic> currentData = snap.data();
+    DocumentSnapshot snap =
+        await (documentCheck() as FutureOr<DocumentSnapshot<Object>>);
+    Map<String, dynamic>? currentData = snap.data() as Map<String, dynamic>?;
 
     if (currentData == null || !currentData.containsKey(postKey)) return 0;
     return currentData[postKey]['clicks'];
@@ -169,15 +174,15 @@ class DataBloc extends Cubit<DataState> {
   /// Called to save [post] when it is clicked by user.
   Future<bool> addPost(Post post) async {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
-      InDataState _state = state;
-      int clickedTimes = await _timesPostClickedEarlier(post.id);
+      InDataState _state = state as InDataState;
+      int? clickedTimes = await _timesPostClickedEarlier(post.id);
 
       // Handle Firebase-less local application
       if (isLocalDatabaseInUse) {
         await PostDataHiveDatabaseHandler.writeToDB(
           postID: post.id,
           postData: PostData(
-            clicks: clickedTimes + 1,
+            clicks: clickedTimes! + 1,
             lastClickTime: DateTime.now(),
             futurePost: Future.value(post),
           ),
@@ -187,7 +192,7 @@ class DataBloc extends Cubit<DataState> {
 
       DocumentReference reference = _state.collection.doc('${docToken}_doc');
 
-      if (clickedTimes > 0) {
+      if (clickedTimes! > 0) {
         Map<String, dynamic> _editedMappedPost = _clickedPostToMap(post);
         _editedMappedPost[post.id.toString()]['clicks'] = clickedTimes + 1;
 
@@ -208,14 +213,14 @@ class DataBloc extends Cubit<DataState> {
   }
 
   /// Deletes Given [post] from saved clicked posts.
-  Future<void> deletePostFromHistory(Post post) async {
+  Future<void> deletePostFromHistory(Post? post) async {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
-      InDataState _state = state;
+      InDataState _state = state as InDataState;
       emit(UnDataState());
 
       // Handle Firebase-less local application
       if (isLocalDatabaseInUse) {
-        await PostDataHiveDatabaseHandler.deletePostData(postID: post.id);
+        await PostDataHiveDatabaseHandler.deletePostData(postID: post!.id);
         emit(_state);
         return;
       }
@@ -223,7 +228,7 @@ class DataBloc extends Cubit<DataState> {
       CollectionReference reference = _state.collection;
       await reference
           .doc('${docToken}_doc')
-          .update({'${post.id}': FieldValue.delete()});
+          .update({'${post!.id}': FieldValue.delete()});
       emit(_state);
     } else
       _loginBloc.emit(SignedOutLoginState());
@@ -232,7 +237,7 @@ class DataBloc extends Cubit<DataState> {
   /// Deletes Given [post] from saved clicked posts.
   Future<int> clearPostHistory() async {
     if (_loginBloc.state is SignedInLoginState && state is InDataState) {
-      InDataState _state = state;
+      InDataState _state = state as InDataState;
       emit(UnDataState());
 
       // Handle Firebase-less local application
@@ -255,9 +260,9 @@ class DataBloc extends Cubit<DataState> {
   ///
   ///  [filter] specifies what property to sort with from ['Time', 'Number of Clicks']
   /// List wil be in ascending order if [isAscending] is true
-  void rebuildClickedPostsStream({String filter, bool isAscending}) {
+  void rebuildClickedPostsStream({String? filter, bool? isAscending}) {
     if (state is InDataState) {
-      InDataState _state = state;
+      InDataState _state = state as InDataState;
       Future.delayed(Duration(milliseconds: 60))
           .then((_) => emit(UnDataState()));
       emit(
@@ -278,13 +283,13 @@ class DataBloc extends Cubit<DataState> {
     postDataList.sort(
       (PostData a, PostData b) {
         if (state is InDataState) {
-          InDataState _state = state;
+          InDataState _state = state as InDataState;
           String _criteria = _state.criteria;
           int isAscending = (_state.isAscending) ? 1 : -1;
           if (_criteria == 'time')
-            return isAscending * a.lastClickTime.compareTo(b.lastClickTime);
+            return isAscending * a.lastClickTime!.compareTo(b.lastClickTime!);
           if (_criteria == 'clicks')
-            return isAscending * a.clicks.compareTo(b.clicks);
+            return isAscending * a.clicks!.compareTo(b.clicks!);
         }
         return 0;
       },
@@ -294,7 +299,7 @@ class DataBloc extends Cubit<DataState> {
 
   /// Extracts Database from Firestore and converts it to a list of [PostData]
   List<PostData> extractDataFromFirebase(
-    Map<String, dynamic> firebaseData,
+    Map<String, dynamic>? firebaseData,
   ) {
     List<PostData> postDataList = [];
     firebaseData?.forEach(
@@ -314,7 +319,7 @@ class DataBloc extends Cubit<DataState> {
   /// Extracts a Reservation Class from a Firebase Map of values
   PostData _mapToClickedPost({
     dynamic postID,
-    Map<String, dynamic> postData,
+    required Map<String, dynamic> postData,
   }) {
     try {
       int id;
@@ -347,11 +352,11 @@ class DataBloc extends Cubit<DataState> {
   ///
   /// Input [unprocessedData] may either be [List<StoreablePostData>] or [DocumentSnapshot].
   List<PostData> extractPostDataFromStoreablePostData(
-      {@required dynamic unprocessedData}) {
+      {required dynamic unprocessedData}) {
     // Ensure proper input
     assert(unprocessedData != null);
     if (unprocessedData is List) {
-      List<StoreablePostData> temp = unprocessedData;
+      List<StoreablePostData> temp = unprocessedData as List<StoreablePostData>;
 
       // Make necessary Conversions.
       List<PostData> out = [];
@@ -361,7 +366,8 @@ class DataBloc extends Cubit<DataState> {
       );
       return _sortPostList(out);
     } else if (unprocessedData is DocumentSnapshot)
-      return extractDataFromFirebase(unprocessedData.data());
+      return extractDataFromFirebase(
+          unprocessedData.data() as Map<String, dynamic>?);
     else
       throw ("Improper input!");
   }

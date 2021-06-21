@@ -20,7 +20,7 @@ class AppConstants extends ChangeNotifier {
   MaterialColor get getLighterForeGroundColor =>
       (_isThemeLight) ? Colors.blue : Colors.yellow;
 
-  Color get getLighterBackGroundColor =>
+  Color? get getLighterBackGroundColor =>
       (_isThemeLight) ? Colors.indigo[900] : Colors.grey[800];
 
   Color get getBackGroundColor => (_isThemeLight) ? Colors.white : Colors.black;

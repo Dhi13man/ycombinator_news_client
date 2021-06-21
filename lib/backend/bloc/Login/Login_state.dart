@@ -6,11 +6,11 @@ import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart'
     as data;
 
 abstract class LoginState extends Equatable {
-  final List propss;
+  final List? propss;
   LoginState([this.propss]);
 
   @override
-  List<Object> get props => (propss ?? []);
+  List<Object?> get props => (propss ?? []);
 }
 
 /// UnInitialized
@@ -22,14 +22,14 @@ class UnLoginState extends LoginState {
 }
 
 class LoadingLoginState extends LoginState {
-  final data.User user;
+  final data.User? user;
 
   LoadingLoginState({this.user}) : super([user]);
 
   @override
   String toString() => (user == null)
       ? 'Loading Google Account State'
-      : 'Loading Account with Email: ${user.email}';
+      : 'Loading Account with Email: ${user!.email}';
 }
 
 /// Initialized
@@ -41,8 +41,8 @@ class SignedOutLoginState extends LoginState {
 }
 
 class SignedInLoginState extends LoginState {
-  final data.User user;
-  final UserCredential credential;
+  final data.User? user;
+  final UserCredential? credential;
 
   SignedInLoginState({this.user, this.credential}) : super([credential]) {
     if (user == null) _openBoxIfLocalUse();
@@ -56,7 +56,7 @@ class SignedInLoginState extends LoginState {
     if (user == data.User(email: 'googleAuth', password: ''))
       return 'Signed in with Google State';
     else if (user != null)
-      return 'Signed in State. Email: ${user.email}';
+      return 'Signed in State. Email: ${user!.email}';
     else
       return 'Authentication not done!';
   }

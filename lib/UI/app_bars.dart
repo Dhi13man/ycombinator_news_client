@@ -8,19 +8,18 @@ import 'package:ycombinator_hacker_news/backend/constants.dart';
 /// Common Buttons for both sort and select bar, allowing user to choose criteria of selection.
 class SortButton extends StatelessWidget {
   const SortButton({
-    Key key,
-    @required String sortByText,
-    @required String selectedCriteriaButtonText,
-    @required void Function({String filter, bool isAscending}) rebuildFunction,
-  })  : _sortByText = sortByText ?? 'null',
-        _selectedCriteriaButtonText = selectedCriteriaButtonText ?? sortByText,
-        assert(rebuildFunction != null),
+    Key? key,
+    required String sortByText,
+    required String selectedCriteriaButtonText,
+    required void Function({String filter, bool? isAscending}) rebuildFunction,
+  })  : _sortByText = sortByText,
+        _selectedCriteriaButtonText = selectedCriteriaButtonText,
         _rebuildClickedPostsStream = rebuildFunction,
         super(key: key);
 
   final String _sortByText;
   final String _selectedCriteriaButtonText;
-  final void Function({String filter, bool isAscending})
+  final void Function({String filter, bool? isAscending})
       _rebuildClickedPostsStream;
 
   @override
@@ -33,7 +32,7 @@ class SortButton extends StatelessWidget {
       child: CupertinoButton(
         padding: EdgeInsets.all(5),
         color: appConstants.getForeGroundColor.shade800,
-        disabledColor: Colors.teal[900],
+        disabledColor: Colors.teal[900]!,
         child: Text(
           _sortByText,
           style: TextStyle(color: Colors.white, fontSize: 10),
@@ -50,7 +49,7 @@ class SortButton extends StatelessWidget {
 
 /// Allows user to sort data extracted from Database (Clicked News Stories)
 class DataSortBar extends StatelessWidget {
-  const DataSortBar({Key key}) : super(key: key);
+  const DataSortBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +74,7 @@ class DataSortBar extends StatelessWidget {
     String selectedCriteriaButtonText = InDataState.sortedByClickTime;
 
     if (dataBloc.state is InDataState) {
-      InDataState state = dataBloc.state;
+      InDataState state = dataBloc.state as InDataState;
       isAscendingSort = state.isAscending;
       selectedCriteriaButtonText = state.selectedCriteriaButtonText;
     }
@@ -129,7 +128,7 @@ class DataSortBar extends StatelessWidget {
 /// Allows user to choose whether they want 'New', 'Top', or 'Best' stories
 /// from Hacker News API.
 class NewsAPICriteriaSelectBar extends StatelessWidget {
-  const NewsAPICriteriaSelectBar({Key key}) : super(key: key);
+  const NewsAPICriteriaSelectBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +137,7 @@ class NewsAPICriteriaSelectBar extends StatelessWidget {
     String selectedCriteriaButtonText = InNewsAPIState.viewByTop;
 
     if (newsAPIBloc.state is InNewsAPIState) {
-      InNewsAPIState state = newsAPIBloc.state;
+      InNewsAPIState state = newsAPIBloc.state as InNewsAPIState;
       selectedCriteriaButtonText = state.selectedCriteriaButtonText;
     }
 
@@ -186,14 +185,14 @@ class NewsAPICriteriaSelectBar extends StatelessWidget {
 /// Reloads the current list with same settings.
 class ReloadPostsButton extends StatelessWidget {
   const ReloadPostsButton({
-    Key key,
-    @required Function({String filter, bool isAscending}) rebuildFunction,
-    @required this.selectedCriteriaButtonText,
-    @required this.appConstants,
+    Key? key,
+    required Function({String? filter, bool? isAscending}) rebuildFunction,
+    required this.selectedCriteriaButtonText,
+    required this.appConstants,
   })  : _rebuildClickedPostsStream = rebuildFunction,
         super(key: key);
 
-  final void Function({String filter, bool isAscending})
+  final void Function({String? filter, bool? isAscending})
       _rebuildClickedPostsStream;
   final String selectedCriteriaButtonText;
   final AppConstants appConstants;

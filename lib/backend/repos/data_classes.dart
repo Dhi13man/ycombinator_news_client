@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
-import 'package:meta/meta.dart';
 
 part 'data_classes.g.dart';
 
@@ -9,20 +8,19 @@ part 'data_classes.g.dart';
 /// [Comment.empty] represents an unauthenticated reservation.
 class Comment extends Equatable {
   const Comment({
-    @required this.id,
-    @required this.postedTime,
-    List<int> children,
+    required int this.id,
+    required this.postedTime,
+    List<int>? children,
     this.parentID,
     this.postedBy = '',
     this.title = '',
-  })  : childComments = children ?? const [],
-        assert(id != null);
+  }) : childComments = children ?? const [];
 
   /// Ycombinator Hacker News comment ID and parent comment Id (if any).
-  final int id, parentID;
+  final int? id, parentID;
 
   /// Name of the one who posted this (display name).
-  final String postedBy;
+  final String? postedBy;
 
   /// The Text of the Comment.
   final String title;
@@ -43,7 +41,7 @@ class Comment extends Equatable {
   );
 
   @override
-  List<Object> get props => [id];
+  List<Object?> get props => [id];
 }
 
 /// Post model
@@ -51,27 +49,26 @@ class Comment extends Equatable {
 /// [Post.empty] represents an unauthenticated reservation.
 class Post extends Equatable {
   const Post({
-    @required this.id,
-    @required this.postedTime,
-    @required this.url,
-    List<int> comments,
+    required this.id,
+    required this.postedTime,
+    required this.url,
+    List<int>? comments,
     this.postedBy = '',
     this.title = '',
   })  : comments = comments ?? const [],
-        assert(id != null),
         super();
 
   /// Ycombinator Hacker News post ID.
   final int id;
 
   /// Name of the one who posted this (display name).
-  final String postedBy;
+  final String? postedBy;
 
   /// Url of Full Post.
-  final String url;
+  final String? url;
 
   /// The Title of the post.
-  final String title;
+  final String? title;
 
   /// Time of Post.
   final DateTime postedTime;
@@ -107,13 +104,13 @@ class PostData {
   );
 
   /// Associated post as a loading Future..
-  final Future<Post> futurePost;
+  final Future<Post>? futurePost;
 
   /// Number of Times Post Clicked.
-  final int clicks;
+  final int? clicks;
 
   /// Last time this Post was Clicked.
-  final DateTime lastClickTime;
+  final DateTime? lastClickTime;
 }
 
 /// Class Representing Storable Post Data for Hive compatibility.
@@ -123,20 +120,20 @@ class PostData {
 class StoreablePostData {
   /// Ycombinator Hacker News post ID.
   @HiveField(0)
-  final int postID;
+  final int? postID;
 
   /// Number of Times Post Clicked.
   @HiveField(1)
-  final int clicks;
+  final int? clicks;
 
   /// Last time this Post was Clicked.
   @HiveField(2)
-  final DateTime lastClickTime;
+  final DateTime? lastClickTime;
 
   const StoreablePostData({
-    @required this.postID,
-    @required this.clicks,
-    @required this.lastClickTime,
+    required this.postID,
+    required this.clicks,
+    required this.lastClickTime,
   });
 }
 
@@ -146,20 +143,19 @@ class StoreablePostData {
 class User extends Equatable {
   const User({
     this.name,
-    @required this.email,
+    required this.email,
     this.id,
-    @required this.password,
-  })  : assert(email != null),
-        assert(password != null);
+    required this.password,
+  });
 
   /// The current user's email address.
   final String email;
 
   /// The current user's id.
-  final String id;
+  final String? id;
 
   /// The current user's name (display name).
-  final String name;
+  final String? name;
 
   /// The current user's name (display name).
   final String password;
@@ -168,5 +164,5 @@ class User extends Equatable {
   static const User empty = User(email: '', id: '', password: '', name: null);
 
   @override
-  List<Object> get props => [email, id, name];
+  List<Object?> get props => [email, id, name];
 }

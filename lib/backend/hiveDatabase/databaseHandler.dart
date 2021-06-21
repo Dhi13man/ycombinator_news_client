@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
@@ -7,13 +6,9 @@ import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 class PostDataHiveDatabaseHandler {
   /// Write [postData] to Database.
   static Future<void> writeToDB({
-    @required int postID,
-    @required PostData postData,
+    required int postID,
+    required PostData postData,
   }) async {
-    // Make sure valid Data
-    assert(postData != null);
-    assert(postID != null);
-
     Box<StoreablePostData> box = Hive.box<StoreablePostData>('clickedPosts');
     if (!box.isOpen)
       box = await Hive.openBox<StoreablePostData>('clickedPosts');
@@ -28,10 +23,8 @@ class PostDataHiveDatabaseHandler {
   }
 
   /// Delete [postData] from Database.
-  static Future<void> deletePostData({@required int postID}) async {
+  static Future<void> deletePostData({required int postID}) async {
     // Make sure it is valid Data
-    assert(postID != null);
-
     Box<StoreablePostData> box = Hive.box<StoreablePostData>('clickedPosts');
     if (!box.isOpen)
       box = await Hive.openBox<StoreablePostData>('clickedPosts');

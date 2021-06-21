@@ -10,9 +10,8 @@ import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 /// for it's children Comments.
 class CommentsListItem extends StatefulWidget {
   final Comment _comment;
-  const CommentsListItem({@required Comment comment, Key key})
-      : assert(comment != null),
-        _comment = comment,
+  const CommentsListItem({required Comment comment, Key? key})
+      : _comment = comment,
         super(key: key);
 
   @override
@@ -20,7 +19,7 @@ class CommentsListItem extends StatefulWidget {
 }
 
 class _CommentsListItemState extends State<CommentsListItem> {
-  bool _areChildrenVisible;
+  late bool _areChildrenVisible;
 
   @override
   void initState() {
@@ -29,7 +28,7 @@ class _CommentsListItemState extends State<CommentsListItem> {
   }
 
   Widget _childrenInfoTextDecoration({
-    Widget child,
+    Widget? child,
     Color color = Colors.white,
   }) {
     if (child == null) return Container();
@@ -153,9 +152,9 @@ class CommentsList extends StatelessWidget {
   final List<int> _commentIDList;
   final AppConstants _appConstants;
   const CommentsList(
-      {@required List<int> commentIDList,
-      @required AppConstants appConstants,
-      Key key})
+      {required List<int> commentIDList,
+      required AppConstants appConstants,
+      Key? key})
       : _commentIDList = commentIDList,
         _appConstants = appConstants,
         super(key: key);
@@ -186,7 +185,7 @@ class CommentsList extends StatelessWidget {
                 );
               return Container();
             }
-            return CommentsListItem(comment: comment ?? Comment.empty);
+            return CommentsListItem(comment: comment);
           },
         );
       },
@@ -197,9 +196,9 @@ class CommentsList extends StatelessWidget {
 /// Interactable, animated card showing [Post] in UI. Acts as app bar.
 class ExpandedPostView extends StatefulWidget {
   const ExpandedPostView({
-    Key key,
-    @required this.appConstants,
-    @required this.viewedPost,
+    Key? key,
+    required this.appConstants,
+    required this.viewedPost,
   }) : super(key: key);
 
   final AppConstants appConstants;
@@ -211,10 +210,10 @@ class ExpandedPostView extends StatefulWidget {
 
 class _ExpandedPostViewState extends State<ExpandedPostView> {
   final double _basePadding = 30, _maxPadding = 60;
-  double _dynamicPadding;
+  double? _dynamicPadding;
 
   bool _postHasValidUrl(DataBloc bloc) =>
-      bloc.isValidUrl(widget.viewedPost.url);
+      bloc.isValidUrl(widget.viewedPost.url!);
 
   @override
   void initState() {
@@ -231,7 +230,7 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
                 () {
                   if (_dynamicPadding == _basePadding && details.delta.dy < 0)
                     return;
-                  else if (_dynamicPadding >= _maxPadding) {
+                  else if (_dynamicPadding! >= _maxPadding) {
                     _dynamicPadding = _maxPadding;
                     return;
                   } else
@@ -249,7 +248,8 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        padding: EdgeInsets.only(bottom: _dynamicPadding, top: _dynamicPadding),
+        padding:
+            EdgeInsets.only(bottom: _dynamicPadding!, top: _dynamicPadding!),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(25),
@@ -324,17 +324,18 @@ class _ExpandedPostViewState extends State<ExpandedPostView> {
 
 /// Shows the Post [post] in an expanded way, followed by its comments.
 class ViewPostScreen extends StatelessWidget {
-  final Post _post;
+  final Post? _post;
   static const String routeName = '/postScreen';
 
-  const ViewPostScreen({Post post, Key key})
+  const ViewPostScreen({Post? post, Key? key})
       : _post = post,
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
     AppConstants appConstants = context.watch<AppConstants>();
-    Post viewedPost = _post ?? ModalRoute.of(context).settings.arguments;
+    Post viewedPost =
+        _post ?? ModalRoute.of(context)!.settings.arguments as Post;
 
     return Scaffold(
       backgroundColor: appConstants.getBackGroundColor,

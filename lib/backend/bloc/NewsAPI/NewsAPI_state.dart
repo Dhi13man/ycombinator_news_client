@@ -2,11 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 
 abstract class NewsAPIState extends Equatable {
-  final List propss;
+  final List? propss;
   NewsAPIState([this.propss]);
 
   @override
-  List<Object> get props => (propss ?? []);
+  List<Object> get props => (propss as List<Object>? ?? []);
 }
 
 /// UnInitialized News API

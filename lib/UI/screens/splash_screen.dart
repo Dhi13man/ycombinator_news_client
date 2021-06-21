@@ -9,13 +9,13 @@ import 'package:ycombinator_hacker_news/UI/screens/login_screen.dart';
 /// Used all over the UI. Can be tapped to toggle theme between Light to Dark.
 class AppHeroIcon extends StatelessWidget {
   const AppHeroIcon({
-    Key key,
-    num iconSize,
-    EdgeInsets margin,
-    EdgeInsets padding,
+    Key? key,
+    num? iconSize,
+    EdgeInsets? margin,
+    EdgeInsets? padding,
     this.backgroundColor,
     this.foregroundColor,
-    @required AppConstants appConstants,
+    required AppConstants appConstants,
   })  : _appConstants = appConstants,
         _size = iconSize ?? 170.0,
         _margin = margin ?? const EdgeInsets.all(20),
@@ -25,7 +25,7 @@ class AppHeroIcon extends StatelessWidget {
   final AppConstants _appConstants;
   final EdgeInsets _margin, _padding;
   final num _size;
-  final Color backgroundColor, foregroundColor;
+  final Color? backgroundColor, foregroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class AppHeroIcon extends StatelessWidget {
 
 /// Shown while Firebase and Hive Initializes.
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key key}) : super(key: key);
+  const SplashScreen({Key? key}) : super(key: key);
 
   static const routeName = '/';
   @override

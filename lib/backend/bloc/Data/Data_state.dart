@@ -1,14 +1,13 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class DataState extends Equatable {
-  final List propss;
+  final List? propss;
   DataState([this.propss]);
 
   @override
-  List<Object> get props => (propss ?? []);
+  List<Object> get props => (propss as List<Object>? ?? []);
 }
 
 /// UnInitialized
@@ -26,7 +25,7 @@ class InDataState extends DataState {
   static const String sortedByClicksNumber = 'Number of Clicks';
 
   InDataState({
-    @required this.collection,
+    required this.collection,
     String criteria = 'Time',
     this.isAscending = true,
   })  : selectedCriteriaButtonText = criteria,

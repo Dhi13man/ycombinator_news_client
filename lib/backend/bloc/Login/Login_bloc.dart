@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/Login/Login_state.dart';
 import 'package:ycombinator_hacker_news/backend/repos/authentication.dart';
@@ -13,9 +12,8 @@ class LoginBloc extends Cubit<LoginState> {
   final AuthenticationRepository _authenticationRepository;
 
   LoginBloc({
-    @required AuthenticationRepository authenticationRepository,
-  })  : assert(authenticationRepository != null),
-        _authenticationRepository = authenticationRepository,
+    required AuthenticationRepository authenticationRepository,
+  })  : _authenticationRepository = authenticationRepository,
         super(UnLoginState());
 
   /// Anonymous Login without Firebase account.
@@ -23,8 +21,8 @@ class LoginBloc extends Cubit<LoginState> {
 
   /// Signs in with the provided [email] and [password].
   void signInEmail({
-    @required String email,
-    @required String password,
+    required String email,
+    required String password,
   }) async {
     try {
       data.User _user = data.User(email: email, password: password);
@@ -65,8 +63,8 @@ class LoginBloc extends Cubit<LoginState> {
 
   /// Creates a new user with the provided [email] and [password].
   void signUpEmail({
-    @required String email,
-    @required String password,
+    required String email,
+    required String password,
   }) async {
     try {
       data.User _user = data.User(email: email, password: password);

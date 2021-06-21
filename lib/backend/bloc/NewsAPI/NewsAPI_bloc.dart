@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:bloc/bloc.dart';
 import 'package:hive/hive.dart';
-import 'package:data_connection_checker/data_connection_checker.dart';
+import 'package:data_connection_checker_tv/data_connection_checker.dart';
 
 import 'package:ycombinator_hacker_news/backend/bloc/NewsAPI/NewsAPI_state.dart';
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
@@ -37,7 +37,7 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
     else {
       /// Check if user has preferred saved News Type Preferences (Top default)
       Box box = Hive.box('settingsBox');
-      String _getSavedCritieria = box.get('newsType');
+      String? _getSavedCritieria = box.get('newsType');
 
       emit(
         InNewsAPIState(
@@ -65,11 +65,12 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
   /// Fetch Post having post ID [id] from News API. Returns a [Future<Post>].
   ///
   /// [repeat] is used to specify how many times the app will try to fetch data before giving up.
-  Future<Post> getPostFromID(int id, {int repeat = 1}) async {
+  Future<Post> getPostFromID(int? id, {int repeat = 1}) async {
     try {
       if (state is ErrorNewsAPIState) await _initialize();
       http.Response response = await http.get(
-        'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty',
+        Uri.parse(
+            'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty'),
       );
       if (response.statusCode != 200)
         throw (HttpException('Response Code ${response.statusCode}'));
@@ -101,7 +102,8 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
       if (state is ErrorNewsAPIState) await _initialize();
 
       http.Response response = await http.get(
-        'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty',
+        Uri.parse(
+            'https://hacker-news.firebaseio.com/v0/item/$id.json?print=pretty'),
       );
       if (response.statusCode != 200)
         throw (HttpException('Response Code ${response.statusCode}'));
@@ -116,7 +118,7 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
           parentID: outputMap['parent'],
           postedBy: outputMap['by'],
           // As comment text comes with inline HTML, text must be extracted from them
-          title: parse(outputMap['text']).body.text,
+          title: parse(outputMap['text']).body!.text,
         );
       }
     } catch (_) {
@@ -148,10 +150,11 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
       if (state is ErrorNewsAPIState) await _initialize();
 
       if (state is InNewsAPIState) {
-        InNewsAPIState _state = state;
+        InNewsAPIState _state = state as InNewsAPIState;
 
         http.Response response = await http.get(
-          'https://hacker-news.firebaseio.com/v0/${_state.criteria}stories.json',
+          Uri.parse(
+              'https://hacker-news.firebaseio.com/v0/${_state.criteria}stories.json'),
         );
         if (response.statusCode != 200)
           throw (HttpException('Response Code ${response.statusCode}'));
@@ -178,9 +181,9 @@ class NewsAPIBloc extends Cubit<NewsAPIState> {
   ///
   ///  [filter] specifies what property to sort with from ['New', 'Top', 'Best']
   /// [isAscending] does nothing and is only there for compatibility.
-  void reloadPosts({String filter, bool isAscending}) {
+  void reloadPosts({String? filter, bool? isAscending}) {
     if (state is InNewsAPIState) {
-      InNewsAPIState _state = state;
+      InNewsAPIState _state = state as InNewsAPIState;
       emit(UnNewsAPIState());
       Future.delayed(Duration(milliseconds: 60)).then(
         (_) => emit(

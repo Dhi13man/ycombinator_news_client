@@ -13,10 +13,10 @@ import 'package:ycombinator_hacker_news/UI/screens/newsfeed_screen.dart';
 /// Contains Sign In, Sign Up, Sign in with Google, Local Sign In and Forgot Password Button.
 class LoginButtons extends StatelessWidget {
   const LoginButtons({
-    Key key,
-    @required AppConstants appConstants,
-    @required bool isFormValid,
-    @required Map<String, TextEditingController> controlmap,
+    Key? key,
+    required AppConstants appConstants,
+    required bool? isFormValid,
+    required Map<String, TextEditingController> controlmap,
   })  : _isFormValid = isFormValid,
         _controlmap = controlmap,
         _appConstants = appConstants,
@@ -28,7 +28,7 @@ class LoginButtons extends StatelessWidget {
 
   final AppConstants _appConstants;
   final EdgeInsets buttonPadding;
-  final bool _isFormValid;
+  final bool? _isFormValid;
   final Map<String, TextEditingController> _controlmap;
 
   Color _buttonForegroundColor(bool isEnabled) =>
@@ -41,14 +41,15 @@ class LoginButtons extends StatelessWidget {
     // Build Button Styles
     final ButtonStyle _buttonStyle = ButtonStyle(
       backgroundColor: MaterialStateProperty.all<Color>(
-        _buttonForegroundColor(_isFormValid),
+        _buttonForegroundColor(_isFormValid!),
       ),
       padding: MaterialStateProperty.all<EdgeInsetsGeometry>(buttonPadding),
     );
 
     bool isEmailValid = (_controlmap['user'] == null)
         ? false
-        : FormBuilderValidators.email()(_controlmap['user'].text) == null;
+        : FormBuilderValidators.email(context)(_controlmap['user']!.text) ==
+            null;
 
     return Container(
       margin: EdgeInsets.only(top: 5, bottom: 5),
@@ -70,7 +71,7 @@ class LoginButtons extends StatelessWidget {
                               Text('Check Email For Password Reset Link...'),
                         ),
                       );
-                      loginBloc.forgotPassword(_controlmap['user'].text);
+                      loginBloc.forgotPassword(_controlmap['user']!.text);
                     },
               child: Text(
                 'Forgot password',
@@ -85,12 +86,12 @@ class LoginButtons extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               ElevatedButton(
-                onPressed: (!_isFormValid)
+                onPressed: (!_isFormValid!)
                     ? null
                     : () {
                         loginBloc.signInEmail(
-                          email: _controlmap['user'].text,
-                          password: _controlmap['pass'].text,
+                          email: _controlmap['user']!.text,
+                          password: _controlmap['pass']!.text,
                         );
                       },
                 style: _buttonStyle,
@@ -103,12 +104,12 @@ class LoginButtons extends StatelessWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: (!_isFormValid)
+                onPressed: (!_isFormValid!)
                     ? null
                     : () {
                         loginBloc.signUpEmail(
-                          email: _controlmap['user'].text,
-                          password: _controlmap['pass'].text,
+                          email: _controlmap['user']!.text,
+                          password: _controlmap['pass']!.text,
                         );
                       },
                 style: _buttonStyle,
@@ -152,11 +153,9 @@ class LoginButtons extends StatelessWidget {
 /// Auto-validated Form allowing user to enter or choose authentication method.
 class LoginForm extends StatefulWidget {
   final AppConstants _appConstants;
-  final GlobalKey<FormState> _formKey;
 
-  LoginForm({Key key, @required AppConstants appConstants})
+  const LoginForm({Key? key, required AppConstants appConstants})
       : _appConstants = appConstants,
-        _formKey = GlobalKey<FormState>(),
         super(key: key);
 
   @override
@@ -164,19 +163,22 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  GlobalKey<FormState>? _formKey;
+
   final Map<String, TextEditingController> _controlMap = {
     'user': TextEditingController(),
     'pass': TextEditingController(),
   };
-  bool _validatedForm;
+  bool? _validatedForm;
 
   void _update() {
-    setState(() => _validatedForm = widget._formKey.currentState.validate());
+    setState(() => _validatedForm = _formKey!.currentState!.validate());
   }
 
   @override
   void initState() {
     _validatedForm = false;
+    _formKey = GlobalKey<FormState>();
     super.initState();
   }
 
@@ -192,34 +194,34 @@ class _LoginFormState extends State<LoginForm> {
       margin: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 15),
       shadowColor: widget._appConstants.getLighterForeGroundColor,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 3, horizontal: 30),
+        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 30),
         child: Form(
-          key: widget._formKey,
+          key: _formKey,
           autovalidateMode: AutovalidateMode.always,
           onChanged: _update,
           child: Column(
             children: [
               FormBuilderTextField(
-                validators: [
-                  FormBuilderValidators.required(),
-                  FormBuilderValidators.email(),
-                ],
-                decoration: InputDecoration(
-                  labelText: 'Email Address',
+                validator: FormBuilderValidators.compose(
+                  [
+                    FormBuilderValidators.required(context),
+                    FormBuilderValidators.email(context),
+                  ],
                 ),
+                decoration: const InputDecoration(labelText: 'Email Address'),
                 controller: _controlMap['user'],
-                attribute: 'user',
+                name: 'user',
               ),
               FormBuilderTextField(
-                validators: [
-                  FormBuilderValidators.required(),
-                  FormBuilderValidators.minLength(6),
-                ],
-                decoration: InputDecoration(
-                  labelText: 'Password',
+                validator: FormBuilderValidators.compose(
+                  [
+                    FormBuilderValidators.required(context),
+                    FormBuilderValidators.minLength(context, 6),
+                  ],
                 ),
+                decoration: const InputDecoration(labelText: 'Password'),
                 controller: _controlMap['pass'],
-                attribute: 'pass',
+                name: 'pass',
               ),
               LoginButtons(
                 appConstants: widget._appConstants,
@@ -247,28 +249,26 @@ class LoginScreen extends StatelessWidget {
   final String _title;
 
   static const routeName = '/login';
-  LoginScreen({Key key, String title})
+  LoginScreen({Key? key, String? title})
       : _title = title ?? 'App Title',
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
     AppConstants _appConstants = context.watch<AppConstants>();
-    LoginBloc loginBloc = context.watch<LoginBloc>();
 
     return BlocListener<LoginBloc, LoginState>(
-      cubit: loginBloc,
       listener: (context, state) {
         if (state is LoadingLoginState) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              duration: Duration(days: 30),
-              padding: EdgeInsets.all(2),
+              duration: const Duration(days: 30),
+              padding: const EdgeInsets.all(2),
               content: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Text('Attempting to Log you in...'),
-                  CircularProgressIndicator(),
+                  const Text('Attempting to Log you in...'),
+                  const CircularProgressIndicator(),
                 ],
               ),
             ),
@@ -288,7 +288,7 @@ class LoginScreen extends StatelessWidget {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: Center(child: Text('Sign in Error')),
+              title: const Center(child: Text('Sign in Error')),
               content: Text('${errorState.errorMessage}'),
             ),
           );
@@ -304,7 +304,7 @@ class LoginScreen extends StatelessWidget {
               children: <Widget>[
                 AppHeroIcon(appConstants: _appConstants, iconSize: 150.0),
                 Container(
-                  margin: EdgeInsets.all(20),
+                  margin: const EdgeInsets.all(20),
                   child: Text(
                     _title,
                     style: TextStyle(

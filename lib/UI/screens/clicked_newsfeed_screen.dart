@@ -14,7 +14,7 @@ import 'package:ycombinator_hacker_news/UI/screens/splash_screen.dart';
 import 'package:ycombinator_hacker_news/UI/app_bars.dart';
 
 class ClickedNewsFeedList extends StatelessWidget {
-  const ClickedNewsFeedList({Key key}) : super(key: key);
+  const ClickedNewsFeedList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -67,26 +67,24 @@ class ClickedNewsFeedList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   PostData postData = postDataList[index];
                   // To get associated Post from PostData.
-                  return FutureBuilder(
+                  return FutureBuilder<Post?>(
                     future: postData.futurePost,
-                    builder: (context, snapshot) {
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
                       if (!snapshot.hasData)
                         return SpinKitWave(
                           color: appConstants.getForeGroundColor,
                         );
 
-                      Post post = snapshot.data;
+                      Post? post = snapshot.data;
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Column(
                               children: [
-                                NewsFeedListItem(
-                                  post: post ?? Post.empty,
-                                ),
+                                NewsFeedListItem(post: post ?? Post.empty),
                                 Text(
-                                  'Last Clicked: ${dataBloc.formatDateTime(postData.lastClickTime)}',
+                                  'Last Clicked: ${dataBloc.formatDateTime(postData.lastClickTime!)}',
                                   style: appConstants.textStyleSubListItem,
                                 ),
                               ],
@@ -129,8 +127,8 @@ class ClickedNewsFeedList extends StatelessWidget {
 
 class ClickedNewsFeedBody extends StatelessWidget {
   const ClickedNewsFeedBody({
-    Key key,
-    @required AppConstants appConstants,
+    Key? key,
+    required AppConstants appConstants,
   })  : _appConstants = appConstants,
         super(key: key);
 
@@ -162,7 +160,7 @@ class ClickedNewsFeedBody extends StatelessWidget {
 /// facilitated by [DataBloc], and retrieving posts by [NewsAPIBloc].
 class ClickedNewsFeedScreen extends StatelessWidget {
   static const routeName = '/clickedfeed';
-  ClickedNewsFeedScreen({Key key, String title}) : super(key: key);
+  const ClickedNewsFeedScreen({Key? key, String? title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +204,6 @@ class ClickedNewsFeedScreen extends StatelessWidget {
         ),
       ),
       body: BlocListener<LoginBloc, LoginState>(
-        cubit: BlocProvider.of<LoginBloc>(context),
         listener: (context, state) {
           if (state is SignedOutLoginState) {
             Navigator.of(context).pushReplacementNamed(
@@ -216,7 +213,7 @@ class ClickedNewsFeedScreen extends StatelessWidget {
         },
         child: GestureDetector(
           onHorizontalDragEnd: (details) {
-            if (details.primaryVelocity > 0) Navigator.of(context).pop();
+            if (details.primaryVelocity! > 0) Navigator.of(context).pop();
           },
           child: ClickedNewsFeedBody(appConstants: appConstants),
         ),

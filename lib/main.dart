@@ -35,6 +35,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider<AppConstants>(
           create: (context) => AppConstants(),
         ),
+        // Three BLoCs for Login, News API and Data respectively.
         BlocProvider<LoginBloc>(
           create: (context) => LoginBloc(
             authenticationRepository: AuthenticationRepository(),
@@ -73,7 +74,6 @@ class MainApp extends StatelessWidget {
                 type: PageTransitionType.fade,
                 settings: settings,
               );
-              break;
 
             case LoginScreen.routeName:
               return PageTransition(
@@ -91,10 +91,9 @@ class MainApp extends StatelessWidget {
                   ),
                 ),
                 type: PageTransitionType.fade,
-                duration: Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 500),
                 settings: settings,
               );
-              break;
 
             case NewsFeedScreen.routeName:
               return PageTransition(
@@ -118,11 +117,10 @@ class MainApp extends StatelessWidget {
                 ),
                 type: PageTransitionType.rightToLeftWithFade,
                 childCurrent: ClickedNewsFeedScreen(),
-                reverseDuration: Duration(milliseconds: 500),
-                duration: Duration(milliseconds: 500),
+                reverseDuration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 500),
                 settings: settings,
               );
-              break;
 
             case ClickedNewsFeedScreen.routeName:
               return PageTransition(
@@ -137,16 +135,15 @@ class MainApp extends StatelessWidget {
                           value: context.watch<DataBloc>(),
                         )
                       ],
-                      child: ClickedNewsFeedScreen(),
+                      child: const ClickedNewsFeedScreen(),
                     );
                   },
                 ),
                 type: PageTransitionType.rightToLeftWithFade,
-                reverseDuration: Duration(milliseconds: 500),
-                duration: Duration(milliseconds: 500),
+                reverseDuration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 500),
                 settings: settings,
               );
-              break;
 
             case ViewPostScreen.routeName:
               return PageTransition(
@@ -164,18 +161,17 @@ class MainApp extends StatelessWidget {
                           value: context.watch<NewsAPIBloc>(),
                         )
                       ],
-                      child: ViewPostScreen(),
+                      child: const ViewPostScreen(),
                     );
                   },
                 ),
                 type: PageTransitionType.scale,
                 alignment: Alignment.center,
                 childCurrent: ClickedNewsFeedScreen(),
-                reverseDuration: Duration(milliseconds: 500),
-                duration: Duration(milliseconds: 500),
+                reverseDuration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 500),
                 settings: settings,
               );
-              break;
 
             default:
               return null;

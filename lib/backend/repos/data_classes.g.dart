@@ -17,9 +17,9 @@ class StoreablePostDataAdapter extends TypeAdapter<StoreablePostData> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return StoreablePostData(
-      postID: fields[0] as int,
-      clicks: fields[1] as int,
-      lastClickTime: fields[2] as DateTime,
+      postID: fields[0] as int?,
+      clicks: fields[1] as int?,
+      lastClickTime: fields[2] as DateTime?,
     );
   }
 

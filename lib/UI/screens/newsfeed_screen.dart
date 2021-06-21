@@ -20,8 +20,8 @@ import 'package:ycombinator_hacker_news/UI/app_bars.dart';
 /// Interactable card that opens [ViewPostScreen] when clicked/tapped.
 class NewsFeedListItem extends StatelessWidget {
   const NewsFeedListItem({
-    Key key,
-    @required this.post,
+    Key? key,
+    required this.post,
   }) : super(key: key);
 
   final Post post;
@@ -32,8 +32,6 @@ class NewsFeedListItem extends StatelessWidget {
     DataBloc dataBloc = BlocProvider.of<DataBloc>(context);
 
     // Final check if associated post has no data
-    if (post == null) return Container();
-
     String numCommentsText = 'with ${post.comments.length} ' +
         ((post.comments.length != 1) ? 'Comments' : 'Comment');
 
@@ -63,13 +61,13 @@ class NewsFeedListItem extends StatelessWidget {
             children: [
               // Fun little Animation when Post tapped and opened.
               Text(
-                'By: ${post.postedBy}, $numCommentsText' ?? '',
+                'By: ${post.postedBy}, $numCommentsText',
                 style: appConstants.textStyleSubListItem,
               ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Text(
-                  'Posted: ${dataBloc.formatDateTime(post.postedTime)}' ?? '',
+                  'Posted: ${dataBloc.formatDateTime(post.postedTime)}',
                   style: appConstants.textStyleSubListItem,
                 ),
               ),
@@ -82,7 +80,7 @@ class NewsFeedListItem extends StatelessWidget {
 }
 
 class NewsFeedList extends StatelessWidget {
-  const NewsFeedList({Key key}) : super(key: key);
+  const NewsFeedList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -92,9 +90,9 @@ class NewsFeedList extends StatelessWidget {
     // News API Business Logic Ready
     return Container(
       // To Load Complete News Feed (List of Posts) based on current chosen criteria.
-      child: FutureBuilder(
+      child: FutureBuilder<List<Future<Post>>>(
         future: newsBloc.getPosts(),
-        builder: (context, snapshot) {
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData)
             return Center(
               child: SpinKitPouringHourglass(
@@ -120,13 +118,13 @@ class NewsFeedList extends StatelessWidget {
             cacheExtent: MediaQuery.of(context).size.height,
             itemBuilder: (context, index) {
               // To load each individual post.
-              return FutureBuilder(
+              return FutureBuilder<Post>(
                 future: futurePosts[index],
-                builder: (context, snapshot) {
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if (!snapshot.hasData)
                     return SpinKitWave(color: appConstants.getForeGroundColor);
 
-                  Post thisPost = snapshot.data;
+                  Post? thisPost = snapshot.data;
 
                   // Check if post not loaded correctly
                   if (thisPost == null || thisPost.id == -9999999) {
@@ -147,8 +145,8 @@ class NewsFeedList extends StatelessWidget {
 
 class NewsFeedBody extends StatelessWidget {
   const NewsFeedBody({
-    Key key,
-    @required AppConstants appConstants,
+    Key? key,
+    required AppConstants appConstants,
   })  : _appConstants = appConstants,
         super(key: key);
 
@@ -214,8 +212,8 @@ class NewsFeedBody extends StatelessWidget {
 
 class NumberOfOpenedLinks extends StatelessWidget {
   const NumberOfOpenedLinks({
-    Key key,
-    @required this.appConstants,
+    Key? key,
+    required this.appConstants,
   }) : super(key: key);
 
   final AppConstants appConstants;
@@ -273,12 +271,12 @@ class NumberOfOpenedLinks extends StatelessWidget {
 /// Shows News Feed from Hacker News API, facilitated by [NewsAPIBloc].
 class NewsFeedScreen extends StatelessWidget {
   static const routeName = '/newsfeed';
-  NewsFeedScreen({Key key, String title}) : super(key: key);
+  NewsFeedScreen({Key? key, String? title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    AppConstants appConstants = context.watch<AppConstants>();
-    LoginBloc loginBloc = context.watch<LoginBloc>();
+    final AppConstants appConstants = context.watch<AppConstants>();
+    final LoginBloc loginBloc = context.watch<LoginBloc>();
 
     return Scaffold(
       backgroundColor: appConstants.getForeGroundColor,
@@ -324,7 +322,7 @@ class NewsFeedScreen extends StatelessWidget {
         ),
       ),
       body: BlocListener<LoginBloc, LoginState>(
-        cubit: loginBloc,
+        bloc: loginBloc,
         listener: (context, state) {
           if (state is SignedOutLoginState)
             Navigator.of(context).pushReplacementNamed(
@@ -333,7 +331,7 @@ class NewsFeedScreen extends StatelessWidget {
         },
         child: GestureDetector(
           onHorizontalDragEnd: (details) {
-            if (details.primaryVelocity < 0)
+            if (details.primaryVelocity! < 0)
               Navigator.of(context).pushNamed(ClickedNewsFeedScreen.routeName);
           },
           child: NewsFeedBody(appConstants: appConstants),

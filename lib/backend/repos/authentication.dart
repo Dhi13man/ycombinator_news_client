@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:meta/meta.dart';
 
 import 'package:ycombinator_hacker_news/backend/repos/data_classes.dart';
 
@@ -25,8 +24,8 @@ class LogOutFailure implements Exception {}
 class AuthenticationRepository {
   /// {@macro authentication_repository}
   AuthenticationRepository({
-    firebase_auth.FirebaseAuth firebaseAuth,
-    GoogleSignIn googleSignIn,
+    firebase_auth.FirebaseAuth? firebaseAuth,
+    GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn.standard();
 
@@ -64,11 +63,10 @@ class AuthenticationRepository {
   ///
   /// Throws a [SignUpFailure] if an exception occurs.
   Future<firebase_auth.UserCredential> signUp({
-    @required String email,
-    @required String password,
+    required String email,
+    required String password,
     bool persists = true,
   }) async {
-    assert(email != null && password != null);
     try {
       if (kIsWeb)
         _firebaseAuth.setPersistence(
@@ -91,7 +89,7 @@ class AuthenticationRepository {
   Future<firebase_auth.UserCredential> logInWithGoogle(
       {bool persists = true}) async {
     try {
-      final googleUser = await _googleSignIn.signIn();
+      final googleUser = await (_googleSignIn.signIn() as FutureOr<GoogleSignInAccount>);
       final googleAuth = await googleUser.authentication;
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -113,11 +111,10 @@ class AuthenticationRepository {
   ///
   /// Throws a [LogInWithEmailAndPasswordFailure] if an exception occurs.
   Future<firebase_auth.UserCredential> logInWithEmailAndPassword({
-    @required String email,
-    @required String password,
+    required String email,
+    required String password,
     bool persists = true,
   }) async {
-    assert(email != null && password != null);
     try {
       if (kIsWeb)
         _firebaseAuth.setPersistence(
@@ -162,6 +159,6 @@ class AuthenticationRepository {
 
 extension on firebase_auth.User {
   User get toUser {
-    return User(id: uid, email: email, name: displayName, password: '');
+    return User(id: uid, email: email!, name: displayName, password: '');
   }
 }
