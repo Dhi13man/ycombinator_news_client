@@ -80,3 +80,11 @@ Animated Post URL opening Example:|
 13. [url_launcher](https://pub.dev/packages/url_launcher) for launching URLs associated with posts.
 
 14. [html](https://pub.dev/packages/html) for parsing comments, which are scraped with inline html.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+See [LICENSE](LICENSE).
